@@ -1,0 +1,18 @@
+package com.csetutorials.expensecircle.entities;
+
+import jakarta.persistence.Id;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@EqualsAndHashCode
+public class ExpenseId {
+
+	@Id
+	private long groupId;
+	@Id
+	private long expenseId;
+
+}

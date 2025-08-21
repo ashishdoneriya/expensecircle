@@ -1,0 +1,20 @@
+<urlrewrite>
+	<log level="DEBUG"/>
+	<!-- Allow paths starting with /api to pass through as is -->
+	<rule>
+		<from>^/api/.*$</from>
+		<to>$0</to> <!-- $0 keeps the path as is -->
+	</rule>
+
+	<!-- Allow paths containing a dot (.) to pass through as is -->
+	<rule>
+		<from>^.*\\..*$</from>
+		<to>$0</to> <!-- $0 keeps the path as is -->
+	</rule>
+
+	<!-- Redirect all other paths to index.html -->
+	<rule>
+		<from>^/.*$</from>
+		<to>/index.html</to>
+	</rule>
+</urlrewrite>
