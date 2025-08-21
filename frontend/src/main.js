@@ -12,7 +12,7 @@ import { useDark } from "@vueuse/core";
 const app = createApp(App);
 
 useDark({
-	storageKey: "theme",
+	storageKey: "isDark",
 });
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

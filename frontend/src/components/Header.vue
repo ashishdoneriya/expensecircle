@@ -14,7 +14,7 @@
 				</el-text>
 			</el-space>
 		</div>
-		<div>
+		<div style="display: flex; align-items: center; gap: 10px">
 			<el-switch
 				v-model="isDark"
 				:active-icon="Moon"
@@ -49,7 +49,7 @@
 	const router = useRouter();
 
 	const isDark = useDark({
-		storageKey: "theme",
+		storageKey: "isDark",
 	});
 
 	function goBackToDashboard() {
