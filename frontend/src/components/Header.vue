@@ -14,7 +14,12 @@
 				</el-text>
 			</el-space>
 		</div>
-		<div>
+		<div style="display: flex; align-items: center; gap: 10px">
+			<el-switch
+				v-model="isDark"
+				:active-icon="Moon"
+				:inactive-icon="Sunny"
+				inline-prompt />
 			<el-dropdown trigger="click" @command="handleCommand">
 				<el-avatar
 					:size="40"
@@ -32,6 +37,8 @@
 	<el-divider style="margin: 0px 0px" />
 </template>
 <script setup>
+	import { Sunny, Moon } from "@element-plus/icons-vue";
+	import { useDark } from "@vueuse/core";
 	import { useGroupStore } from "@/stores/group";
 	import { useUserStore } from "@/stores/user";
 	import { useRouter } from "vue-router";
@@ -40,6 +47,10 @@
 	const group = useGroupStore();
 
 	const router = useRouter();
+
+	const isDark = useDark({
+		storageKey: "isDark",
+	});
 
 	function goBackToDashboard() {
 		group.clearInfo();
