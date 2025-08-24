@@ -106,13 +106,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Docker Image (uses backend/Dockerfile)
+      - name: Build and Push Docker Image
         env:
           IMAGE: ${{ env.IMAGE }}
-        working-directory: backend
         run: |
           test -f ${{ env.JAR_OUT_DIR }}/*.jar || { echo "JAR missing"; exit 1; }
-          docker build -f backend/Dockerfile -t "$IMAGE" .
+          docker build -t "$IMAGE" .
           docker push "$IMAGE"
 
       # -------------------------

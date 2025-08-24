@@ -7,7 +7,7 @@ WORKDIR /app
 RUN apk add --no-cache curl
 
 # Copy the jar built by CI. Dockerfile is inside backend, so no "backend/" prefix here.
-COPY target/*.jar /app/app.jar
+COPY backend/target/*.jar /app/app.jar
 
 ENV JAVA_OPTS=""
 EXPOSE 8080
