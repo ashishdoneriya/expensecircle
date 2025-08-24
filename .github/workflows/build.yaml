@@ -139,34 +139,34 @@ jobs:
             cd "$APP_DIR"
 
             # 3) Write docker-compose.yml with IMAGE expanded and no tabs
-            printf '%s' \
-            'services:
-              app:
-                image: ghcr.io/ashishdoneriya/expensecircle:main
-                restart: unless-stopped
-                env_file: .env
-                ports:
-                  - "80:8080"
-                  - "9001:9001"
-                extra_hosts:
-                  - "host.docker.internal:host-gateway"
-                healthcheck:
-                  test: ["CMD", "curl", "-fsS", "http://localhost:9001/actuator/health"]
-                  interval: 10s
-                  timeout: 3s
-                  retries: 10
-            ' > docker-compose.yml
+            #printf '%s' \
+            #'services:
+            #  app:
+            #    image: ghcr.io/ashishdoneriya/expensecircle:main
+            #    restart: unless-stopped
+            #    env_file: .env
+            #    ports:
+            #      - "80:8080"
+            #      - "9001:9001"
+            #    extra_hosts:
+            #      - "host.docker.internal:host-gateway"
+            #    healthcheck:
+            #      test: ["CMD", "curl", "-fsS", "http://localhost:9001/actuator/health"]
+            #      interval: 10s
+            #      timeout: 3s
+            #      retries: 10
+            #' > docker-compose.yml
 
-            # 4) Write .env with DB creds
-            umask 077
-            printf '%s\n' \
-            'SPRING_PROFILES_ACTIVE=prod' \
-            'DB_HOST=host.docker.internal' \
-            'DB_PORT=3306' \
-            'DB_NAME='${{ secrets.DB_NAME }} \
-            'DB_USER='${{ secrets.DB_USER }} \
-            'DB_PASS='${{ secrets.DB_PASS }} \
-            > .env
+            ## 4) Write .env with DB creds
+            #umask 077
+            #printf '%s\n' \
+            #'SPRING_PROFILES_ACTIVE=prod' \
+            #'DB_HOST=host.docker.internal' \
+            #'DB_PORT=3306' \
+            #'DB_NAME='${{ secrets.DB_NAME }} \
+            #'DB_USER='${{ secrets.DB_USER }} \
+            #'DB_PASS='${{ secrets.DB_PASS }} \
+            #> .env
 
             # 5) Validate compose strictly before pulling
             docker compose config -q
