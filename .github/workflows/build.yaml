@@ -1,0 +1,176 @@
+name: Build and Deploy to Hetzner
+
+# -------------------------------------------------------
+# Triggers
+# -------------------------------------------------------
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+# -------------------------------------------------------
+# Global env
+# -------------------------------------------------------
+env:
+  JAVA_VERSION: "24"                              # Java 24 as you asked
+  NODE_VERSION: "20"
+  FRONTEND_DIR: "frontend"
+  FRONTEND_BUILD_DIR: "dist"                      # change if your Vue build outputs elsewhere
+  BACKEND_DIR: "backend"
+  STATIC_DIR: "backend/src/main/resources/static" # Spring Boot serves from here
+  JAR_OUT_DIR: "backend/target"
+  IMAGE: ghcr.io/${{ github.repository }}:main    # single immutable tag for server pull
+
+# Prevent overlapping deploys on the same branch
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read      # read code
+      packages: write     # push image to GHCR
+
+    steps:
+      # -------------------------
+      # Step 1: Checkout code
+      # -------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # -------------------------
+      # Step 2: Setup Node (npm only, per your choice)
+      # -------------------------
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      # -------------------------
+      # Step 3: Build Vue frontend with npm ci
+      #         npm ci uses package-lock.json exactly -> reproducible builds
+      # -------------------------
+      - name: Build frontend
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: |
+          npm ci
+          npm run build
+          test -d "${{ env.FRONTEND_BUILD_DIR }}" || { echo "Build dir not found"; exit 1; }
+
+      # -------------------------
+      # Step 4: Copy built UI into Spring Boot static
+      # -------------------------
+      - name: Inject frontend into backend static
+        run: |
+          mkdir -p "${{ env.STATIC_DIR }}"
+          rm -rf "${{ env.STATIC_DIR }}"/*
+          cp -R "${{ env.FRONTEND_DIR }}/${{ env.FRONTEND_BUILD_DIR }}/"* "${{ env.STATIC_DIR }}/"
+          test -f "${{ env.STATIC_DIR }}/index.html" || { echo "index.html missing in static"; exit 1; }
+
+      # -------------------------
+      # Step 5: Setup Java 24
+      # -------------------------
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+
+      # -------------------------
+      # Step 6: Build Spring Boot JAR with tests
+      # -------------------------
+      - name: Build JAR
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: mvn -B verify
+
+      # -------------------------
+      # Step 7: Verify the JAR actually contains UI
+      # -------------------------
+      - name: Verify jar contains UI
+        run: |
+          JAR=$(ls ${{ env.JAR_OUT_DIR }}/*.jar | head -n1)
+          unzip -l "$JAR" | grep -E "BOOT-INF/classes/static/index\.html" >/dev/null || { echo "UI not in jar"; exit 1; }
+
+      # -------------------------
+      # Step 8: Log in to GHCR and build+push runtime-only image
+      # -------------------------
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image (uses backend/Dockerfile)
+        env:
+          IMAGE: ${{ env.IMAGE }}
+        run: |
+          test -f ${{ env.JAR_OUT_DIR }}/*.jar || { echo "JAR missing"; exit 1; }
+          docker build -f backend/Dockerfile -t "$IMAGE" .
+          docker push "$IMAGE"
+
+      # -------------------------
+      # Step 9: SSH deploy to Hetzner with compose + healthcheck
+      # -------------------------
+      - name: Deploy to Hetzner via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HZ_HOST }}          # your Hetzner IP
+          username: ${{ secrets.HZ_USER }}      # usually root
+          key: ${{ secrets.HZ_SSH_KEY }}        # private key
+          port: ${{ secrets.HZ_SSH_PORT }}      # 22 if unsure
+          script_stop: true
+          envs: IMAGE
+          script: |
+            set -euo pipefail
+
+            # 1) Login to GHCR on server using a PAT with read:packages
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_PAT }}
+
+            # 2) Prepare app dir
+            APP_DIR=/root/expensecircle
+            mkdir -p "$APP_DIR"
+            cd "$APP_DIR"
+
+            # 3) Write compose with healthcheck (uses curl inside container)
+            cat > docker-compose.yml <<'YML'
+            services:
+              app:
+                image: ${IMAGE}
+                restart: unless-stopped
+                env_file: .env
+                ports:
+                  - "80:8080"
+                  - "9001:9001"
+                extra_hosts:
+                  - "host.docker.internal:host-gateway"
+                healthcheck:
+                  test: ["CMD", "curl", "-fsS", "http://localhost:9001/actuator/health"]
+                  interval: 10s
+                  timeout: 3s
+                  retries: 10
+            YML
+
+            # 4) Write runtime env (DB creds from GitHub Secrets)
+            umask 077
+            cat > .env <<ENV
+            SPRING_PROFILES_ACTIVE=prod
+            DB_HOST=host.docker.internal
+            DB_PORT=3306
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASS=${{ secrets.DB_PASS }}
+            ENV
+
+            # 5) Pull and restart
+            docker compose pull
+            docker compose up -d
+
+            # 6) Status + recent logs
+            docker compose ps
+            docker compose logs --tail=50 app || true
