@@ -141,7 +141,7 @@ jobs:
             cat > docker-compose.yml <<EOF
             services:
               app:
-                image: ${IMAGE}
+                image: ghcr.io/ashishdoneriya/expensecircle:main
                 restart: unless-stopped
                 env_file: .env
                 ports:
