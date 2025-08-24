@@ -129,16 +129,16 @@ jobs:
           script: |
             set -euo pipefail
 
-            # 1) Login to GHCR on server using a PAT with read:packages
+            # 1) Login to GHCR on the server
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_PAT }}
 
-            # 2) Prepare app dir
+            # 2) Prepare app directory
             APP_DIR=/root/expensecircle
             mkdir -p "$APP_DIR"
             cd "$APP_DIR"
 
-            # 3) Write compose with healthcheck (uses curl inside container)
-            cat > docker-compose.yml <<'YML'
+            # 3) Write docker-compose.yml with IMAGE expanded and no tabs
+            cat > docker-compose.yml <<EOF
             services:
               app:
                 image: ${IMAGE}
@@ -146,7 +146,7 @@ jobs:
                 env_file: .env
                 ports:
                   - "80:8080"
-                  - "127.0.0.1:9001:9001"
+                  - "9001:9001"
                 extra_hosts:
                   - "host.docker.internal:host-gateway"
                 healthcheck:
@@ -154,23 +154,25 @@ jobs:
                   interval: 10s
                   timeout: 3s
                   retries: 10
-            YML
+            EOF
 
-            # 4) Write runtime env (DB creds from GitHub Secrets)
+            # 4) Write .env with DB creds
             umask 077
-            cat > .env <<ENV
+            cat > .env <<EOF
             SPRING_PROFILES_ACTIVE=prod
             DB_HOST=host.docker.internal
             DB_PORT=3306
             DB_NAME=${{ secrets.DB_NAME }}
             DB_USER=${{ secrets.DB_USER }}
             DB_PASS=${{ secrets.DB_PASS }}
-            ENV
+            EOF
 
-            # 5) Pull and restart
+            # 5) Validate compose strictly before pulling
+            docker compose config -q
+
+            # 6) Pull and restart
             docker compose pull
             docker compose up -d
-
-            # 6) Status + recent logs
             docker compose ps
             docker compose logs --tail=50 app || true
+
