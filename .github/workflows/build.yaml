@@ -128,6 +128,7 @@ jobs:
           envs: IMAGE
           script: |
             set -euo pipefail
+            unset PROMPT_COMMAND
 
             # 1) Login to GHCR on the server
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_PAT }}
@@ -138,8 +139,8 @@ jobs:
             cd "$APP_DIR"
 
             # 3) Write docker-compose.yml with IMAGE expanded and no tabs
-            cat > docker-compose.yml <<EOF
-            services:
+            printf '%s' \
+            'services:
               app:
                 image: ghcr.io/ashishdoneriya/expensecircle:main
                 restart: unless-stopped
@@ -154,18 +155,18 @@ jobs:
                   interval: 10s
                   timeout: 3s
                   retries: 10
-            EOF
+            ' > docker-compose.yml
 
             # 4) Write .env with DB creds
             umask 077
-            cat > .env <<EOF
-            SPRING_PROFILES_ACTIVE=prod
-            DB_HOST=host.docker.internal
-            DB_PORT=3306
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASS=${{ secrets.DB_PASS }}
-            EOF
+            printf '%s\n' \
+            'SPRING_PROFILES_ACTIVE=prod' \
+            'DB_HOST=host.docker.internal' \
+            'DB_PORT=3306' \
+            'DB_NAME='${{ secrets.DB_NAME }} \
+            'DB_USER='${{ secrets.DB_USER }} \
+            'DB_PASS='${{ secrets.DB_PASS }} \
+            > .env
 
             # 5) Validate compose strictly before pulling
             docker compose config -q
