@@ -112,13 +112,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Docker Image
-        env:
-          IMAGE: ${{ env.IMAGE }}
-        run: |
-          test -f ${{ env.JAR_OUT_DIR }}/*.jar || { echo "JAR missing"; exit 1; }
-          docker buildx build --platform linux/amd64,linux/arm64 -t "$IMAGE" --push .
-          docker push "$IMAGE"
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          file: Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ghcr.io/${{ github.repository }}:main
 
       # -------------------------
       # Step 9: SSH deploy to Hetzner with compose + healthcheck
