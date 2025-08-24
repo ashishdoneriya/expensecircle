@@ -182,6 +182,12 @@ jobs:
             #'DB_PASS='${{ secrets.DB_PASS }} \
             #> .env
 
+            export DB_HOST="172.18.0.1"
+            export DB_PORT="3306"
+            export DB_NAME="${{ secrets.DB_NAME }}"
+            export DB_USER="${{ secrets.DB_USER }}"
+            export DB_PASS="${{ secrets.DB_PASS }}"
+
             # 5) Validate compose strictly before pulling
             docker compose config -q
 
