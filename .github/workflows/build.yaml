@@ -146,7 +146,7 @@ jobs:
                 env_file: .env
                 ports:
                   - "80:8080"
-                  - "9001:9001"
+                  - "127.0.0.1:9001:9001"
                 extra_hosts:
                   - "host.docker.internal:host-gateway"
                 healthcheck:
