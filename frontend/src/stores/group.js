@@ -23,8 +23,8 @@ export const useGroupStore = defineStore("groupStore", {
 			this.groupId = groupId;
 			this.fetchCategories();
 			this.fetchTags();
-			this.fetchMembers();
 			await this.fetchGroupInfo();
+			await this.fetchMembers();
 		},
 
 		async fetchGroupInfo() {
