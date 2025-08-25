@@ -108,7 +108,7 @@
 						:disabled="!form.amount">
 						Delete
 					</el-button>
-					<el-button @click="goToExpensesPage">Cancel</el-button>
+					<el-button @click="goBack">Cancel</el-button>
 				</el-form-item>
 			</el-form>
 		</el-col>
@@ -175,7 +175,7 @@
 				icon: markRaw(Delete),
 			});
 			await api.deleteExpense(group.groupId, expense.value.expenseId);
-			goToExpensesPage();
+			goBack();
 		} catch (error) {
 
 		}
@@ -203,7 +203,7 @@
 							offset: window.innerHeight - 100,
 						});
 						group.fetchTags();
-						goToExpensesPage();
+						goBack();
 					})
 					.catch((error) => {
 						ElMessage({
@@ -218,8 +218,8 @@
 		});
 	}
 
-	function goToExpensesPage() {
-		router.push(`/groups/${group.groupId}/expenses`);
+	function goBack() {
+		router.back();
 	}
 
 	function addCategory() {
