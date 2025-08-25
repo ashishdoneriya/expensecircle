@@ -72,13 +72,13 @@
 
 <style scoped>
 	.bottom-bar {
-		z-index: 999999;
+		z-index: 1000;
 		opacity: 1;
 		position: fixed;
 		bottom: 0;
 		width: 100%;
 		height: 60px;
-		background-color: var(--el-background-color);
+		background-color: var(--el-bg-color-overlay);
 		display: flex;
 		justify-content: space-around;
 		align-items: center;

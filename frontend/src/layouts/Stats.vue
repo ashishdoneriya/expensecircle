@@ -24,10 +24,7 @@
 				top: 50%;
 				transform: translate(-50%, -50%);
 			">
-			<el-icon
-				style="cursor: pointer"
-				@click="loadPrevious"
-				v-if="!disableAll">
+			<el-icon style="cursor: pointer" @click="loadPrevious" v-if="!disableAll">
 				<ArrowLeftBold />
 			</el-icon>
 			<el-icon class="is-loading" v-if="disableAll">
@@ -55,9 +52,7 @@
 				:disabled="disableAll"
 				:loading="disableAll"
 				:style="
-					isMobile
-						? ''
-						: 'width: 130px;margin-right: 10px;margin-left: 10px;'
+					isMobile ? '' : 'width: 130px;margin-right: 10px;margin-left: 10px;'
 				"
 				@change="refresh"
 				:editable="false" />
@@ -99,7 +94,11 @@
 					:default-sort="{ prop: 'amount', order: 'descending' }">
 					<el-table-column label="Category" sortable align="left">
 						<template #default="scope">
-							<el-tag v-if="scope.row.categoryId != 0" type="primary" @click="openCategogyExpenses(scope.row.categoryId)" class="cursorPointer">
+							<el-tag
+								v-if="scope.row.categoryId != 0"
+								type="primary"
+								@click="openCategogyExpenses(scope.row.categoryId)"
+								class="cursorPointer">
 								{{ group.categoriesMap[scope.row.categoryId] }}
 							</el-tag>
 						</template>
@@ -191,6 +190,7 @@
 	import { useRoute, useRouter } from "vue-router";
 	import { useGroupStore } from "@/stores/group";
 	import * as api from "@/api/api";
+	import { getLastExpensesDate } from "@/utils/lastDateStorage";
 
 	const isMobile = window.innerWidth <= 720;
 	const disableAll = ref(false);
@@ -307,10 +307,7 @@
 				breakdownByCategory.value = data.data;
 			})
 			.catch((error) => {
-				console.error(
-					"Error fetching getMonthlyBreakdownByCategory:",
-					error,
-				);
+				console.error("Error fetching getMonthlyBreakdownByCategory:", error);
 			});
 
 		const promise3 = api
@@ -345,10 +342,7 @@
 				breakdownByCategory.value = data.data;
 			})
 			.catch((error) => {
-				console.error(
-					"Error fetching getYearlyBreakdownByCategory:",
-					error,
-				);
+				console.error("Error fetching getYearlyBreakdownByCategory:", error);
 			});
 
 		const promise3 = api
@@ -375,18 +369,41 @@
 	}
 
 	function openCategogyExpenses(categoryId) {
-		intervalType.value //Monthly and Yearly
-		// year.value
-		// month.value
-		let sDate = `${year.value}-${month.value.toString().padStart(2, '0')}-01`
-		router.push({
-			path: `/groups/${group.groupId}/expenses`,
-			query: {
-				interval: 'Monthly',
-				date: sDate,
-				category: categoryId
+		const basePath = `/groups/${group.groupId}/expenses`;
+
+		// fallback = today's day in 2 digits
+		const today = new Date();
+		let day = String(today.getDate()).padStart(2, "0");
+
+		// cache is always an object from your store
+		const cache = getLastExpensesDate();
+		if (
+			cache.date &&
+			cache.groupId &&
+			typeof cache.date === "string" &&
+			!isNaN(Number(cache.groupId)) &&
+			/^\d{4}-\d{2}-\d{2}$/.test(cache.date)
+		) {
+			const d = cache.date.split("-")[2];
+			const prevGroupId = Number(cache.groupId);
+
+			const curGroupId = Number(group.groupId);
+
+			if (prevGroupId === curGroupId) {
+				day = d;
 			}
-		})
+		}
+
+		const sDate = `${String(year.value)}-${String(month.value).padStart(2, "0")}-${day}`;
+
+		router.push({
+			path: basePath,
+			query: {
+				interval: "Monthly",
+				date: sDate,
+				category: categoryId,
+			},
+		});
 	}
 </script>
 

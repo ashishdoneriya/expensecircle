@@ -194,6 +194,8 @@
 	import * as api from "@/api/api";
 	import DailyExpenseTable from "@/components/DailyExpenseTable.vue";
 	import DailyExpenseTableCollapsable from "@/components/DailyExpenseTableCollapsable.vue";
+	import { setLastExpensesDate } from "@/utils/lastDateStorage";
+
 	const isMobile = window.innerWidth <= 720;
 	const disableAll = ref(true);
 
@@ -304,6 +306,8 @@
 				},
 			});
 		}
+
+		setLastExpensesDate(route.query.date || null, group.groupId);
 	}
 
 	function isValidDateFormat(dateStr) {

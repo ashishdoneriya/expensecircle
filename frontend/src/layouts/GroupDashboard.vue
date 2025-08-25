@@ -1,7 +1,7 @@
 <template>
 	<Header></Header>
 	<el-container>
-		<el-main style="padding: 10px">
+		<el-main style="padding: 10px; margin-bottom: 100px">
 			<router-view />
 		</el-main>
 	</el-container>
@@ -22,7 +22,4 @@
 			group.initialize(route.params.groupId);
 		}
 	});
-
 </script>
-
-
