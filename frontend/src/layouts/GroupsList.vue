@@ -36,6 +36,7 @@
 							<el-row class="flex-container">
 								<div>
 									<el-link
+										:underline="false"
 										style="
 											font-size: var(--el-font-size-large);
 											font-weight: 400;
@@ -57,7 +58,9 @@
 							</el-row>
 						</el-col>
 						<el-col :span="24">
-							<el-divider border-style="dashed" style="margin: 5px 0px" />
+							<el-divider
+								border-style="dashed"
+								style="margin: 5px 0px" />
 						</el-col>
 					</el-row>
 				</el-col>
@@ -174,7 +177,9 @@
 				},
 			);
 			await api.deleteGroup(group.groupId);
-			let indexToRemove = groups.value.findIndex(item => item.groupId === group.groupId);
+			let indexToRemove = groups.value.findIndex(
+				(item) => item.groupId === group.groupId,
+			);
 			groups.value.splice(indexToRemove, 1);
 		} catch (error) {}
 	}

@@ -99,7 +99,7 @@
 					:default-sort="{ prop: 'amount', order: 'descending' }">
 					<el-table-column label="Category" sortable align="left">
 						<template #default="scope">
-							<el-tag v-if="scope.row.categoryId != 0" type="primary">
+							<el-tag v-if="scope.row.categoryId != 0" type="primary" @click="openCategogyExpenses(scope.row.categoryId)" class="cursorPointer">
 								{{ group.categoriesMap[scope.row.categoryId] }}
 							</el-tag>
 						</template>
@@ -201,6 +201,7 @@
 	const month = computed(() => datePickerDate.value.getMonth() + 1);
 	const datePicker = ref(null);
 	const totalAmount = ref(0);
+	const router = useRouter();
 	const totalAmountFormatted = computed(() =>
 		totalAmount.value.toLocaleString("en-IN"),
 	);
@@ -371,6 +372,21 @@
 		Promise.allSettled([promise1, promise2, promise3, promise4]).then(() => {
 			disableAll.value = false;
 		});
+	}
+
+	function openCategogyExpenses(categoryId) {
+		intervalType.value //Monthly and Yearly
+		// year.value
+		// month.value
+		let sDate = `${year.value}-${month.value.toString().padStart(2, '0')}-01`
+		router.push({
+			path: `/groups/${group.groupId}/expenses`,
+			query: {
+				interval: 'Monthly',
+				date: sDate,
+				category: categoryId
+			}
+		})
 	}
 </script>
 

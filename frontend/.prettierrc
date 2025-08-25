@@ -1,6 +1,6 @@
 {
 	"useTabs": true,
-	"tabWidth": 3,
+	"tabWidth": 2,
 	"htmlWhitespaceSensitivity": "ignore",
 	"printWidth": 80,
 	"vueIndentScriptAndStyle": true,

@@ -38,13 +38,13 @@
 										alt="Icon"
 										class="icon handle cursorPointer"
 										style="margin-right: 5px" />
-									<el-link
+									<el-text
 										style="
 											font-size: var(--el-font-size-large);
 											font-weight: 400;
 										">
 										{{ element.tagName }}
-									</el-link>
+									</el-text>
 								</div>
 								<div>
 									<el-button
