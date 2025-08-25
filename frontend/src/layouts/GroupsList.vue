@@ -69,14 +69,14 @@
 	</el-container>
 </template>
 <script setup>
-	import { useUserStore } from "@/stores/user";
+
 	import { ref, onMounted } from "vue";
 	import { useRouter } from "vue-router";
 	import * as api from "@/api/api";
 	import { ElMessage, ElMessageBox } from "element-plus";
 	import { Delete, Edit } from "@element-plus/icons-vue";
 	import { useGroupStore } from "@/stores/group";
-	const userStore = useUserStore();
+
 	const router = useRouter();
 	const groupStore = useGroupStore();
 	// Example list of groups (replace with actual data or API calls)
@@ -115,11 +115,6 @@
 		}
 		newGroupInputDisabled.value = false;
 		newGroupButtonDisabled.value = false;
-	}
-
-	function logout() {
-		userStore.logout();
-		router.push({ name: "Login" });
 	}
 
 	async function fetchGroups() {

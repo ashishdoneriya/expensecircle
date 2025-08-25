@@ -17,3 +17,6 @@
 .cursorPointer {
 	cursor: pointer;
 }
+html {
+  overflow-y: scroll; /* keeps scrollbar space reserved */
+}
