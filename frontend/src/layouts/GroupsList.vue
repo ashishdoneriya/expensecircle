@@ -119,6 +119,10 @@
 
 	async function fetchGroups() {
 		groups.value = (await api.getGroups()).data;
+		/* If there is only one group then directly move to that group's expense page*/
+		if (!window.history.state?.back && groups.value && groups.value.length == 1) {
+			goToGroup(groups.value[0])
+		}
 	}
 
 	function goToGroup(group) {
