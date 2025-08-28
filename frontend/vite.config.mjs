@@ -93,6 +93,10 @@ export default defineConfig({
 						type: "image/png",
 					},
 				],
+				workbox: {
+					skipWaiting: true,
+					clientsClaim: true,
+				},
 			},
 		}),
 	],
