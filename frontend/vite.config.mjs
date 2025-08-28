@@ -79,7 +79,7 @@ export default defineConfig({
 					"standalone",
 					"browser",
 				],
-				background_color: "#ffffff",
+				background_color: "#141414",
 				theme_color: "#000000",
 				icons: [
 					{
