@@ -1,1 +1,0 @@
-{"name":"Expense Circle","short_name":"Expense Circle","start_url":"/","display":"standalone","background_color":"#ffffff","lang":"en","scope":"/","display_override":["window-controls-overlay","standalone","browser"],"theme_color":"#000000","icons":[{"src":"/wallet.png","sizes":"192x192","type":"image/png"},{"src":"/wallet.png","sizes":"512x512","type":"image/png"}]}
