@@ -12,7 +12,7 @@ on:
 # Global env
 # -------------------------------------------------------
 env:
-  JAVA_VERSION: "24"                              # Java 24 as you asked
+  JAVA_VERSION: "25"                              # Java 25 as you asked
   NODE_VERSION: "20"
   FRONTEND_DIR: "frontend"
   FRONTEND_BUILD_DIR: "dist"                      # change if your Vue build outputs elsewhere
@@ -72,7 +72,7 @@ jobs:
           test -f "${{ env.STATIC_DIR }}/index.html" || { echo "index.html missing in static"; exit 1; }
 
       # -------------------------
-      # Step 5: Setup Java 24
+      # Step 5: Setup Java 25
       # -------------------------
       - name: Setup Java
         uses: actions/setup-java@v4

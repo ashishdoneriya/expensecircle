@@ -1,6 +1,6 @@
 # backend/Dockerfile
 # Runtime-only image for Spring Boot, Java 24
-FROM eclipse-temurin:24-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
 # Install curl so docker-compose healthcheck can run inside this container
