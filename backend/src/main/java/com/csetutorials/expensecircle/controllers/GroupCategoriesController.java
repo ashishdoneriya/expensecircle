@@ -8,7 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -21,15 +21,7 @@ public class GroupCategoriesController {
 	@GetMapping
 	public List<GroupCategory> getCategories(@PathVariable("groupId") long groupId) {
 		List<GroupCategory> list = service.getCategories(groupId);
-		Collections.sort(list, (o1, o2) -> {
-			if (o1.getOrderNumber() < o2.getOrderNumber()) {
-				return -1;
-			} else if (o1.getOrderNumber() > o2.getOrderNumber()) {
-				return 1;
-			} else {
-				return 1;
-			}
-		});
+		list.sort(Comparator.comparingLong(GroupCategory::getOrderNumber));
 		return list;
 	}
 

@@ -1,5 +1,6 @@
 package com.csetutorials.expensecircle.entities;
 
+import com.csetutorials.expensecircle.entities.ids.ExpenseId;
 import com.csetutorials.expensecircle.jsonconverters.SetLongToJsonConverter;
 import jakarta.persistence.*;
 import lombok.*;

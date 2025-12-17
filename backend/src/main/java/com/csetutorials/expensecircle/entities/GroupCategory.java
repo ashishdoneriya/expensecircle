@@ -1,5 +1,6 @@
 package com.csetutorials.expensecircle.entities;
 
+import com.csetutorials.expensecircle.entities.ids.GroupCategoryId;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

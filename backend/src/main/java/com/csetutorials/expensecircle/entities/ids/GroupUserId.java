@@ -1,4 +1,4 @@
-package com.csetutorials.expensecircle.entities;
+package com.csetutorials.expensecircle.entities.ids;
 
 import jakarta.persistence.Id;
 import lombok.EqualsAndHashCode;
@@ -8,13 +8,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode
-public class GroupTagId {
+public class GroupUserId {
 
 	@Id
 	private long groupId;
 
 	@Id
-	private long tagId;
-
+	private String userId;
 
 }

@@ -1,4 +1,4 @@
-package com.csetutorials.expensecircle.entities;
+package com.csetutorials.expensecircle.entities.ids;
 
 import jakarta.persistence.Id;
 import lombok.EqualsAndHashCode;
