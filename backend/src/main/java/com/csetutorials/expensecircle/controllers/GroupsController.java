@@ -64,7 +64,7 @@ public class GroupsController {
 	}
 
 	@PostMapping("/{groupId}")
-	public void changeGroupName(@PathVariable("groupId") long groupId, @RequestBody @Valid UserId userId) {
+	public void changeGroupName(@PathVariable("groupId") long groupId, @RequestBody @Valid UserIdWrapper userId) {
 		groupUserService.checkCurrentUserAdmin(groupId);
 		groupUserService.updateGroupName(groupId, userId.getUserId());
 	}
@@ -81,7 +81,7 @@ public class GroupsController {
 	}
 
 	@PostMapping("/{groupId}/remove-user")
-	public void removeUser(@PathVariable("groupId") long groupId, @RequestBody @Valid UserId userId) {
+	public void removeUser(@PathVariable("groupId") long groupId, @RequestBody @Valid UserIdWrapper userId) {
 		groupUserService.checkCurrentUserAdmin(groupId);
 		groupUserService.deleteByGroupIdAndUserId(groupId, userId.getUserId());
 		if (groupUserService.findByGroupId(groupId).isEmpty()) {
@@ -90,7 +90,7 @@ public class GroupsController {
 	}
 
 	@PostMapping("/{groupId}/add-user")
-	public void addUser(@PathVariable("groupId") long groupId, @RequestBody @Valid UserId userId) {
+	public void addUser(@PathVariable("groupId") long groupId, @RequestBody @Valid UserIdWrapper userId) {
 		groupUserService.checkCurrentUserAdmin(groupId);
 		Optional<GroupUser> currentUser = groupUserService.findByGroupIdAndUserId(
 			groupId, loggedInUserInfoService.getInfo().getEmail());

@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserId {
+public class UserIdWrapper {
 
 	@NotNull
 	@NotBlank

@@ -1,6 +1,6 @@
 package com.csetutorials.expensecircle.entities;
 
-import com.csetutorials.expensecircle.entities.ids.ExpenseId;
+import com.csetutorials.expensecircle.entities.ids.ExpenseIdWrapper;
 import com.csetutorials.expensecircle.jsonconverters.SetLongToJsonConverter;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,7 +14,7 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "expenses")
-@IdClass(ExpenseId.class)
+@IdClass(ExpenseIdWrapper.class)
 public class Expense {
 
 	@Id

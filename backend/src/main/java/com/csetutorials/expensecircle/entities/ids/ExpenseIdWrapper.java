@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode
-public class ExpenseId {
+public class ExpenseIdWrapper {
 
 	@Id
 	private long groupId;
