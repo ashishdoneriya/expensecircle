@@ -168,24 +168,15 @@ jobs:
             #      DB_NAME: ${DB_NAME}
             #      DB_USER: ${DB_USER}
             #      DB_PASS: ${DB_PASS}
+            #      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
             #' > docker-compose.yml
-
-            ## 4) Write .env with DB creds
-            #umask 077
-            #printf '%s\n' \
-            #'SPRING_PROFILES_ACTIVE=prod' \
-            #'DB_HOST=host.docker.internal' \
-            #'DB_PORT=3306' \
-            #'DB_NAME='${{ secrets.DB_NAME }} \
-            #'DB_USER='${{ secrets.DB_USER }} \
-            #'DB_PASS='${{ secrets.DB_PASS }} \
-            #> .env
 
             export DB_HOST="172.18.0.1"
             export DB_PORT="3306"
             export DB_NAME="${{ secrets.DB_NAME }}"
             export DB_USER="${{ secrets.DB_USER }}"
             export DB_PASS="${{ secrets.DB_PASS }}"
+            export GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}"
 
             # 5) Validate compose strictly before pulling
             docker compose config -q
