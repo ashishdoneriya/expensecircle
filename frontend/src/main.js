@@ -11,6 +11,12 @@ import { useDark } from "@vueuse/core";
 
 const app = createApp(App);
 
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+if (!googleClientId) {
+	throw new Error("Google Client ID is not set. Please configure VITE_GOOGLE_CLIENT_ID.");
+}
+
 useDark({
 	storageKey: "isDark",
 });
@@ -20,8 +26,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 }
 //app.use(ElementPlus, { size: 'small', zIndex: 3000 })
 app.use(ElementPlus).use(router).use(pinia).use(vue3GoogleLogin, {
-	clientId:
-		"378687249491-55qmh3gcrv72dbhqf67bh1o09rgpr9hh.apps.googleusercontent.com",
+	clientId: googleClientId,
 });
 
 app.mount("#app");
