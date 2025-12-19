@@ -1,6 +1,7 @@
 package com.csetutorials.expensecircle.repositories;
 
 import com.csetutorials.expensecircle.entities.Expense;
+import com.csetutorials.expensecircle.entities.ids.ExpenseIdWrapper;
 import com.csetutorials.expensecircle.projection.*;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ExpenseRepository extends JpaRepository<Expense, Expense> {
+public interface ExpenseRepository extends JpaRepository<Expense, ExpenseIdWrapper> {
 
 	Optional<Expense> findByGroupIdAndExpenseId(
 		long groupId, long expenseId);
@@ -21,16 +22,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Expense> {
 
 	List<ExpenseProjection> findByGroupIdAndCategoryIdAndYearAndMonthAndDayOfMonth(
 		long groupId, long categoryId, short year, byte month, byte dayOfMonth);
-
-	@Modifying
-	@Transactional
-	@Query("delete from Expense e where e.groupId = :groupId and e.expenseId = :expenseId")
-	void deleteExpense(@Param("groupId") long groupId, @Param("expenseId") long expenseId);
-
-	@Modifying
-	@Transactional
-	@Query("delete from Expense e where e.groupId = :groupId")
-	void deleteExpenses(@Param("groupId") long groupId);
 
 	@Query("select e.month as month, sum(e.amount) as amount from Expense e where e.groupId = :groupId and e.year = :year " +
 		"group by e.month")
@@ -96,23 +87,16 @@ public interface ExpenseRepository extends JpaRepository<Expense, Expense> {
 		@Param("month") byte month, @Param("dayOfMonth") byte dayOfMonth,
 		@Param("categoryId") long categoryId);
 
-	@Query(value = "SELECT tag AS tagId, SUM(e.amount) AS amount " +
-		"FROM expenses e, JSON_TABLE(e.tags, '$[*]' COLUMNS (tag BIGINT PATH '$')) AS jt " +
-		"WHERE e.groupId = :groupId " +
-		"AND e.year = :year " +
-		"GROUP BY tag",
-		nativeQuery = true)
+	@Query(value = "SELECT et.tagId as tagId, SUM(e.amount) as amount FROM Expense e " +
+		"JOIN ExpenseTag et on et.groupId = e.groupId and et.expenseId = e.expenseId " +
+		"and e.groupId = :groupId and e.groupId = :groupId and e.year = :year group by tagId")
 	List<TagAmountProjection> getYearlyBreakdownByTag(
 		@Param("groupId") long groupId,
 		@Param("year") short year);
 
-	@Query(value = "SELECT tag AS tagId, SUM(e.amount) AS amount " +
-		"FROM expenses e, JSON_TABLE(e.tags, '$[*]' COLUMNS (tag BIGINT PATH '$')) AS jt " +
-		"WHERE e.groupId = :groupId " +
-		"AND e.year = :year " +
-		"AND e.month = :month " +
-		"GROUP BY tag",
-		nativeQuery = true)
+	@Query(value = "SELECT et.tagId as tagId, SUM(e.amount) as amount FROM Expense e " +
+		"JOIN ExpenseTag et on et.groupId = e.groupId and et.expenseId = e.expenseId " +
+		"and e.groupId = :groupId and e.groupId = :groupId and e.year = :year and e.month = :month group by tagId")
 	List<TagAmountProjection> getMonthlyBreakdownByTag(
 		@Param("groupId") long groupId,
 		@Param("year") short year,
@@ -121,11 +105,15 @@ public interface ExpenseRepository extends JpaRepository<Expense, Expense> {
 	@Transactional
 	@Modifying
 	@Query("update Expense e set e.categoryId = 0 where e.groupId = :groupId and e.categoryId = :categoryId")
-	void deleteCategory(long groupId, long categoryId);
+	void deleteByCategoryId(long groupId, long categoryId);
 
 	@Transactional
 	@Modifying
-	@Query(value = "update expenses SET tags = JSON_REMOVE(tags, JSON_UNQUOTE(JSON_SEARCH(tags, 'all', :tagId)))" +
-		" where groupId = :groupId and JSON_CONTAINS(tags, '[:tagId]')", nativeQuery = true)
-	void deleteTag(long groupId, long tagId);
+	@Query("delete from Expense e where e.groupId = :groupId")
+    void deleteByGroupId(@Param("groupId") long groupId);
+
+	@Transactional
+	@Modifying
+	@Query("delete from Expense e where e.groupId = :groupId and e.expenseId = :expenseId")
+    void deleteByGroupIdAndExpenseId(@Param("groupId") long groupId, @Param("expenseId") long expenseId);
 }

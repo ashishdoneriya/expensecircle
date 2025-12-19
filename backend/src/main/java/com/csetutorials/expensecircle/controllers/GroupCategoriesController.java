@@ -1,8 +1,10 @@
 package com.csetutorials.expensecircle.controllers;
 
+import com.csetutorials.expensecircle.annotations.GroupMemberOnly;
 import com.csetutorials.expensecircle.beans.Name;
 import com.csetutorials.expensecircle.beans.NewOrder;
 import com.csetutorials.expensecircle.entities.GroupCategory;
+import com.csetutorials.expensecircle.services.AsyncCalls;
 import com.csetutorials.expensecircle.services.GroupCategoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +15,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/groups/{groupId}/categories")
+@GroupMemberOnly
 public class GroupCategoriesController {
 
 	@Autowired
 	private GroupCategoryService service;
+	@Autowired
+	private AsyncCalls asyncCalls;
 
 	@GetMapping
 	public List<GroupCategory> getCategories(@PathVariable("groupId") long groupId) {
@@ -54,7 +59,7 @@ public class GroupCategoriesController {
 	public void deleteCategory(
 		@PathVariable("groupId") long groupId,
 		@PathVariable("categoryId") long categoryId) {
-		service.deleteCategory(groupId, categoryId);
+		asyncCalls.deleteCategory(groupId, categoryId);
 	}
 
 

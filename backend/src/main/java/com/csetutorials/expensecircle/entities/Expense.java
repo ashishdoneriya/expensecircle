@@ -1,11 +1,8 @@
 package com.csetutorials.expensecircle.entities;
 
 import com.csetutorials.expensecircle.entities.ids.ExpenseIdWrapper;
-import com.csetutorials.expensecircle.jsonconverters.SetLongToJsonConverter;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.Set;
 
 @Getter
 @Setter
@@ -43,14 +40,12 @@ public class Expense {
 	@Column(nullable = false)
 	private long categoryId;
 
-	@Column(nullable = false)
-	@Convert(converter = SetLongToJsonConverter.class)
-	private Set<Long> tags;
-
 	@Column(length = 254)
 	private String ownerUserId;
 
 	@Column(length = 254)
 	private String lastChangedByUserId;
+
+	// Tags are handled separately
 
 }

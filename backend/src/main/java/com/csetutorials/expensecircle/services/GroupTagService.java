@@ -10,7 +10,10 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class GroupTagService {
@@ -31,12 +34,18 @@ public class GroupTagService {
 		repo.save(new GroupTag(groupId, tagId, tagName, tagId));
 	}
 
-	public void renameTag(long groupId, long tagId, String newTagName) {
-		repo.renameTag(groupId, tagId, newTagName);
+	public List<GroupTag> addTags(long groupId, Collection<String> tagNames) {
+		long currentTimeMillis = System.currentTimeMillis();
+		List<GroupTag> list = new ArrayList<>();
+		for (String tagName: tagNames) {
+			list.add(new GroupTag(groupId, currentTimeMillis, tagName, currentTimeMillis++));
+		}
+		repo.saveAll(list);
+		return list;
 	}
 
-	public void deleteTag(long groupId, long tagId) {
-		repo.deleteTag(groupId, tagId);
+	public void renameTag(long groupId, long tagId, String newTagName) {
+		repo.renameTag(groupId, tagId, newTagName);
 	}
 
 	public void changeTagsOrder(long groupId, List<NewOrder> list) {
@@ -52,5 +61,9 @@ public class GroupTagService {
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public void verifyTags(long groupId, Set<Long> tags) {
+		tags.retainAll(getTags(groupId).stream().map(obj -> obj.getTagId()).toList());
 	}
 }

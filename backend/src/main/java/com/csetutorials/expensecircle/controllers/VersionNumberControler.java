@@ -10,7 +10,7 @@ public class VersionNumberControler {
 
 	@GetMapping
 	public String getVersion() {
-		return "2025-09-03 20.48.00";
+		return "2025-09-03 20.48.01";
 	}
 
 }

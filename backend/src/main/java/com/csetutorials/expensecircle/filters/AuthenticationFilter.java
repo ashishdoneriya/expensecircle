@@ -1,5 +1,6 @@
 package com.csetutorials.expensecircle.filters;
 
+import com.csetutorials.expensecircle.beans.UserInfo;
 import com.csetutorials.expensecircle.exceptions.JWTDeserializationException;
 import com.csetutorials.expensecircle.services.JWTService;
 import com.csetutorials.expensecircle.services.LoggedInUserInfoService;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -48,7 +50,14 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 		}
 		token = token.trim();
 		try {
-			loggedInUserInfoService.setInfo(jwtService.deserialize(token));
+			UserInfo userInfo = jwtService.deserialize(token);
+			loggedInUserInfoService.setInfo(userInfo);
+			var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+				userInfo, null, java.util.Collections.emptyList()
+			);
+
+			// 2. Pin it on the Notice Board
+			SecurityContextHolder.getContext().setAuthentication(auth);
 		} catch (JWTDeserializationException e) {
 			return false;
 		}

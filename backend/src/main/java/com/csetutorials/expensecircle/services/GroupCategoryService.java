@@ -18,8 +18,6 @@ public class GroupCategoryService {
 	@Autowired
 	private GroupCategoryRepository repo;
 	@Autowired
-	private ExpenseCoordinator expenseCoordinator;
-	@Autowired
 	private DataSource dataSource;
 
 	private static final String ORDER_CHANGE_QUERY =
@@ -35,11 +33,6 @@ public class GroupCategoryService {
 
 	public void renameCategory(long groupId, long categoryId, String newCategoryName) {
 		repo.renameCategory(groupId, categoryId, newCategoryName);
-	}
-
-	public void deleteCategory(long groupId, long categoryId) {
-		expenseCoordinator.deleteCategory(groupId, categoryId);
-		repo.deleteCategory(groupId, categoryId);
 	}
 
 	public void changeCategoriesOrder(long groupId, List<NewOrder> list) {

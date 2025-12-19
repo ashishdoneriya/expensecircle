@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
 import * as api from "@/api/api";
 
+import { useUserStore } from "@/stores/user";
+
 export const useGroupStore = defineStore("groupStore", {
 	state: () => ({
 		groupId: 0,
@@ -28,7 +30,7 @@ export const useGroupStore = defineStore("groupStore", {
 		},
 
 		async fetchGroupInfo() {
-			this.groupInfo = (await api.getUserGroupInfo(this.groupId)).data;
+			this.groupInfo = (await api.getGroupInfo(this.groupId)).data;
 			this.groupName = this.groupInfo.groupName;
 		},
 
@@ -40,8 +42,9 @@ export const useGroupStore = defineStore("groupStore", {
 		async fetchMembers() {
 			this.members = (await api.getGroupMembers(this.groupId)).data;
 			let member;
+			const userStore = useUserStore();
 			for (let i = 0; i < this.members.length; i++) {
-				if (this.members[i].userId == this.groupInfo.userId) {
+				if (this.members[i].userId == userStore.email) {
 					member = this.members[i];
 					this.members.splice(i, 1);
 					break;

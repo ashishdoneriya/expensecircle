@@ -1,25 +1,35 @@
 package com.csetutorials.expensecircle.controllers;
 
+import com.csetutorials.expensecircle.annotations.GroupMemberOnly;
 import com.csetutorials.expensecircle.beans.AddExpenseRequest;
 import com.csetutorials.expensecircle.beans.UpdateExpenseRequest;
 import com.csetutorials.expensecircle.beans.UserInfo;
-import com.csetutorials.expensecircle.entities.Expense;
+import com.csetutorials.expensecircle.dto.ExpenseResponseDto;
 import com.csetutorials.expensecircle.projection.ExpenseProjection;
+import com.csetutorials.expensecircle.services.AsyncCalls;
 import com.csetutorials.expensecircle.services.ExpenseCoordinator;
+import com.csetutorials.expensecircle.services.ExpenseService;
 import com.csetutorials.expensecircle.services.LoggedInUserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/groups/{groupId}/expenses")
+@GroupMemberOnly
 public class ExpenseController {
 
 	@Autowired
 	private LoggedInUserInfoService loggedInUserInfoService;
 	@Autowired
 	private ExpenseCoordinator expenseCoordinator;
+	@Autowired
+	private ExpenseService expenseService;
+	@Autowired
+	private AsyncCalls asyncCalls;
 
 	@GetMapping
 	public List<ExpenseProjection> listExpenses(
@@ -29,9 +39,9 @@ public class ExpenseController {
 		@RequestParam("dayOfMonth") byte dayOfMonth,
 		@RequestParam(name = "categoryId", required = false, defaultValue = "") String sCategoryId) {
 		if (sCategoryId.trim().isEmpty()) {
-			return expenseCoordinator.listExpenses(groupId, year, month, dayOfMonth);
+			return expenseService.listExpenses(groupId, year, month, dayOfMonth);
 		}
-		return expenseCoordinator.listExpenses(groupId, Long.parseLong(sCategoryId), year, month, dayOfMonth);
+		return expenseService.listExpenses(groupId, Long.parseLong(sCategoryId), year, month, dayOfMonth);
 	}
 
 	@PostMapping
@@ -43,10 +53,11 @@ public class ExpenseController {
 	}
 
 	@GetMapping("/{expenseId}")
-	public Expense getExpense(
+	public ExpenseResponseDto getExpense(
 		@PathVariable("groupId") long groupId,
 		@PathVariable("expenseId") long expenseId) {
-		return expenseCoordinator.get(groupId, expenseId);
+		return expenseCoordinator.findByGroupIdAndExpenseId(groupId, expenseId).orElseThrow(() -> new ResponseStatusException(
+				HttpStatus.NOT_FOUND, "Expense not found"));
 	}
 
 	@PutMapping("/{expenseId}")
@@ -63,7 +74,7 @@ public class ExpenseController {
 	public void deleteExpense(
 		@PathVariable("groupId") long groupId,
 		@PathVariable("expenseId") long expenseId) {
-		expenseCoordinator.deleteExpense(groupId, expenseId);
+		asyncCalls.deleteExpense(groupId, expenseId);
 	}
 
 }

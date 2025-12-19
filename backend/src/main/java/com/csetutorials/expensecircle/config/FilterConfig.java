@@ -1,7 +1,6 @@
 package com.csetutorials.expensecircle.config;
 
 import com.csetutorials.expensecircle.filters.AuthenticationFilter;
-import com.csetutorials.expensecircle.filters.GroupAuthorizationFilter;
 import com.csetutorials.expensecircle.filters.InlineUrlRewriteFilter;
 import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +13,6 @@ public class FilterConfig {
 
 	@Autowired
 	private AuthenticationFilter authenticationFilter;
-	@Autowired
-	private GroupAuthorizationFilter groupAuthorizationFilter;
 
 	@Bean
 	public FilterRegistrationBean<AuthenticationFilter> jwtFilter() {
@@ -35,22 +32,11 @@ public class FilterConfig {
 	}
 
 	@Bean
-	public FilterRegistrationBean<GroupAuthorizationFilter> groupFilterRegistration() {
-		FilterRegistrationBean<GroupAuthorizationFilter> registrationBean = new FilterRegistrationBean<>();
-		registrationBean.setFilter(groupAuthorizationFilter);
-
-		registrationBean.addUrlPatterns("/api/groups/*");
-
-		registrationBean.setOrder(2);
-		return registrationBean;
-	}
-
-	@Bean
 	public FilterRegistrationBean<InlineUrlRewriteFilter> urlRewriteFilter() {
 		FilterRegistrationBean<InlineUrlRewriteFilter> filterRegistrationBean = new FilterRegistrationBean<>(new InlineUrlRewriteFilter());
 		filterRegistrationBean.setName("InlineUrlRewriteFilter");
 		filterRegistrationBean.addUrlPatterns("/groups*"); // Apply to all routes
-		filterRegistrationBean.setOrder(3); // Set order if other filters are in use
+		filterRegistrationBean.setOrder(2); // Set order if other filters are in use
 		return filterRegistrationBean;
 	}
 

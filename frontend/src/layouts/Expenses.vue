@@ -25,7 +25,7 @@
 				transform: translate(-50%, -50%);
 			">
 			<el-icon
-				style="cursor: pointer"
+				class="cursorPointer"
 				@click="loadPrevious"
 				v-if="!disableAll">
 				<ArrowLeftBold />
@@ -36,8 +36,8 @@
 			<label
 				v-if="isMobile"
 				@click="openDatePicker"
+				class="cursorPointer"
 				style="
-					cursor: pointer;
 					font-weight: bold;
 					margin-right: 10px;
 					margin-left: 10px;
@@ -56,13 +56,13 @@
 				:loading="disableAll"
 				:style="
 					isMobile
-						? ''
-						: 'width: 130px;margin-right: 10px;margin-left: 10px;'
+						? 'cursor:pointer'
+						: 'width: 130px;margin-right: 10px;margin-left: 10px;cursor:pointer;'
 				"
 				@change="refresh"
 				:editable="false" />
 
-			<el-icon style="cursor: pointer" @click="loadNext" v-if="!disableAll">
+			<el-icon class="cursorPointer" @click="loadNext" v-if="!disableAll">
 				<ArrowRightBold />
 			</el-icon>
 			<el-icon class="is-loading" v-if="disableAll">

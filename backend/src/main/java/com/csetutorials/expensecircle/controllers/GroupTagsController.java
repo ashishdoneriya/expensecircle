@@ -1,9 +1,10 @@
 package com.csetutorials.expensecircle.controllers;
 
+import com.csetutorials.expensecircle.annotations.GroupMemberOnly;
 import com.csetutorials.expensecircle.beans.Name;
 import com.csetutorials.expensecircle.beans.NewOrder;
 import com.csetutorials.expensecircle.entities.GroupTag;
-import com.csetutorials.expensecircle.services.ExpenseCoordinator;
+import com.csetutorials.expensecircle.services.AsyncCalls;
 import com.csetutorials.expensecircle.services.GroupTagService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +15,17 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/groups/{groupId}/tags")
+@GroupMemberOnly
 public class GroupTagsController {
 
 	@Autowired
-	private GroupTagService service;
+	private GroupTagService groupTagService;
 	@Autowired
-	private ExpenseCoordinator expenseCoordinator;
+	private AsyncCalls asyncCalls;
 
 	@GetMapping
 	public List<GroupTag> getTags(@PathVariable("groupId") long groupId) {
-		List<GroupTag> list = service.getTags(groupId);
+		List<GroupTag> list = groupTagService.getTags(groupId);
 		list.sort(Comparator.comparingLong(GroupTag::getOrderNumber));
 		return list;
 	}
@@ -33,7 +35,7 @@ public class GroupTagsController {
 		@PathVariable("groupId") long groupId,
 		@Valid @RequestBody Name name) {
 		long timestamp = System.currentTimeMillis();
-		service.addTag(groupId, timestamp, name.getName());
+		groupTagService.addTag(groupId, timestamp, name.getName());
 		return timestamp;
 	}
 
@@ -44,7 +46,7 @@ public class GroupTagsController {
 		if (list == null || list.isEmpty()) {
 			return;
 		}
-		service.changeTagsOrder(groupId, list);
+		groupTagService.changeTagsOrder(groupId, list);
 	}
 
 	@PutMapping("/{tagId}")
@@ -52,15 +54,14 @@ public class GroupTagsController {
 		@PathVariable("groupId") long groupId,
 		@PathVariable("tagId") long tagId,
 		@Valid @RequestBody Name name) {
-		service.renameTag(groupId, tagId, name.getName());
+		groupTagService.renameTag(groupId, tagId, name.getName());
 	}
 
 	@DeleteMapping("/{tagId}")
 	public void deleteTag(
 		@PathVariable("groupId") long groupId,
 		@PathVariable("tagId") long tagId) {
-		service.deleteTag(groupId, tagId);
-		expenseCoordinator.deleteTag(groupId, tagId);
+		asyncCalls.deleteTag(groupId, tagId);
 	}
 
 }

@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -15,10 +16,15 @@ public interface GroupTagRepository extends JpaRepository<GroupTag, GroupTag> {
 	@Modifying
 	@Transactional
 	@Query("delete from GroupTag gc where gc.groupId = :groupId and gc.tagId = :tagId")
-	void deleteTag(long groupId, long tagId);
+	void deleteByGroupIdAndTagId(long groupId, long tagId);
 
 	@Modifying
 	@Transactional
 	@Query("update GroupTag gc set gc.tagName = :tagName where gc.groupId = :groupId and gc.tagId = :tagId")
 	void renameTag(long groupId, long tagId, String tagName);
+
+	@Modifying
+	@Transactional
+	@Query("delete from GroupTag gc where gc.groupId = :groupId")
+    void deleteByGroupId(@Param("groupId") long groupId);
 }

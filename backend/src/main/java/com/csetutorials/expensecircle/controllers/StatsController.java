@@ -1,5 +1,6 @@
 package com.csetutorials.expensecircle.controllers;
 
+import com.csetutorials.expensecircle.annotations.GroupMemberOnly;
 import com.csetutorials.expensecircle.projection.CategoryAmountProjection;
 import com.csetutorials.expensecircle.projection.DayOfMonthAmountProjection;
 import com.csetutorials.expensecircle.projection.MonthAmountProjection;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/groups/{groupId}/stats")
+@GroupMemberOnly
 public class StatsController {
 
 	@Autowired

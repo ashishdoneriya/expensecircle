@@ -163,19 +163,37 @@
 	}
 
 	async function leaveGroup() {
-		if (group.groupInfo.role == "ADMIN" && group.members.length > 1) {
-			for (let member of group.members) {
-				if (member.role == "MEMBER" && member.userId != userStore.email) {
+		if (group.groupInfo.role = 'ADMIN') {
+			if (group.members.length == 1) {
+				await askConfirmation(
+					"If you leave then this groups will be permanently deleted. Are you sure want to leave this group?",
+				);
+			} else {
+				if (getNumAdmins() == 1) {
 					await askConfirmation(
 						"Currently, you are the only ADMIN of this group. If you leave then all other members will automatically become ADMIN. Are you sure want to leave this group?",
 					);
-					return;
+				} else {
+					await askConfirmation(
+						"Are you sure want to leave this group?",
+					);
 				}
 			}
+		} else {
+			await askConfirmation(
+				"Are you sure want to leave this group?",
+			);
 		}
-		await askConfirmation(
-			"If you leave then all of the expenses of this groups will be permanently deleted. Are you sure want to leave this group?",
-		);
+	}
+
+	function getNumAdmins() {
+		let count = 0;
+		for (let member of group.members) {
+			if (member.role == 'ADMIN') {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	async function askConfirmation(message) {

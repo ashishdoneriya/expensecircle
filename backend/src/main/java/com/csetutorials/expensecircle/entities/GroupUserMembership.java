@@ -15,10 +15,10 @@ import lombok.Setter;
 @Entity
 @Table(name = "groupUsers")
 @IdClass(GroupUserId.class)
-public class GroupUser {
+public class GroupUserMembership {
 
 	@Id
-	private long groupId;
+	private Long groupId;
 
 	@Id
 	private String userId;
@@ -26,11 +26,5 @@ public class GroupUser {
 	@Column
 	@Enumerated(EnumType.STRING)
 	private Role role;
-
-	@Column(length = 200)
-	private String groupName;
-
-	@Column(length = 254)
-	private String userName;
 
 }

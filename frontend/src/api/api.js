@@ -63,10 +63,10 @@ export function changeGroupName(groupId, groupName) {
 }
 
 export function getGroups() {
-	return apiClient.get("/groups");
+	return apiClient.get("/groups/me");
 }
 
-export function getUserGroupInfo(groupId) {
+export function getGroupInfo(groupId) {
 	return apiClient.get(`/groups/${groupId}`);
 }
 
@@ -207,7 +207,7 @@ export function changeTagsOrder(groupId, tags) {
 }
 
 export function getGroupMembers(groupId) {
-	return apiClient.get(`/groups/${groupId}/users`);
+	return apiClient.get(`/groups/${groupId}/members`);
 }
 
 export function removeUser(groupId, userId) {

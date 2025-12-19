@@ -1,6 +1,7 @@
 package com.csetutorials.expensecircle.controllers;
 
 import com.csetutorials.expensecircle.beans.UserInfo;
+import com.csetutorials.expensecircle.services.AsyncCalls;
 import com.csetutorials.expensecircle.services.GoogleTokenVerifier;
 import com.csetutorials.expensecircle.services.JWTService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -24,11 +25,13 @@ import java.util.Map;
 public class LoginController {
 
 	@Autowired
-	JWTService jwtService;
+	private JWTService jwtService;
 
 	@Autowired
-	GoogleTokenVerifier googleTokenVerifier;
+	private GoogleTokenVerifier googleTokenVerifier;
 
+	@Autowired
+	private AsyncCalls asyncCalls;
 
 	@PostMapping("google-id-token")
 	public ResponseEntity<?> verifyToken(@RequestBody Map<String, String> body) {
@@ -60,6 +63,8 @@ public class LoginController {
 		response.put("email", email);
 		response.put("picture", picture);
 		response.put("serverAuthToken", jwtService.serialize(new UserInfo(name, email, picture)));
+
+		asyncCalls.updateUserInfo(email, name, picture);
 
 		// Return the user information and JWT token
 		return ResponseEntity.ok(response);

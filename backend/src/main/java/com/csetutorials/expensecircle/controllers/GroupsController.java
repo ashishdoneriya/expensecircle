@@ -1,109 +1,107 @@
 package com.csetutorials.expensecircle.controllers;
 
+import com.csetutorials.expensecircle.annotations.GroupAdminOnly;
+import com.csetutorials.expensecircle.annotations.GroupMemberOnly;
 import com.csetutorials.expensecircle.beans.*;
-import com.csetutorials.expensecircle.entities.GroupUser;
-import com.csetutorials.expensecircle.services.ExpenseCoordinator;
-import com.csetutorials.expensecircle.services.GroupUserService;
-import com.csetutorials.expensecircle.services.LoggedInUserInfoService;
+import com.csetutorials.expensecircle.dto.GroupUserResponseDto;
+import com.csetutorials.expensecircle.entities.Group;
+import com.csetutorials.expensecircle.projection.GroupUserProjection;
+import com.csetutorials.expensecircle.services.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/groups")
 public class GroupsController {
 
 	@Autowired
-	private GroupUserService groupUserService;
-	@Autowired
 	private LoggedInUserInfoService loggedInUserInfoService;
 	@Autowired
-	private ExpenseCoordinator expenseCoordinator;
+	private GroupService groupService;
+	@Autowired
+	private GroupUserMembershipService groupUserMembershipService;
+	@Autowired
+	private AsyncCalls asyncCalls;
 
-	@GetMapping
-	public List<GroupUser> getGroups() {
+	/**
+	 * This method returns list of groups of the current logged in user
+	 */
+	@GetMapping("/me")
+	public List<GroupUserResponseDto> seeMyGroups() {
 		UserInfo userInfo = loggedInUserInfoService.getInfo();
-		List<GroupUser> list = groupUserService.findByUserId(userInfo.getEmail());
-		list.stream()
-			.filter(obj -> obj.getUserName() == null || obj.getUserName().trim().isEmpty())
-			.forEach(obj -> {
-				obj.setUserName(userInfo.getName());
-				groupUserService.save(obj);
-			});
-		return list;
+		return groupUserMembershipService.findByUserId(userInfo.getEmail());
 	}
 
 	@GetMapping("/{groupId}")
-	public GroupUser getGroupInfoForUser(@PathVariable("groupId") long groupId) {
-		UserInfo userInfo = loggedInUserInfoService.getInfo();
-		Optional<GroupUser> opt = groupUserService.findByGroupIdAndUserId(groupId, userInfo.getEmail());
-		if (opt.isPresent()) {
-			GroupUser groupUser = opt.get();
-			if (groupUser.getUserName() == null || groupUser.getUserName().trim().isEmpty()) {
-				groupUser.setUserName(userInfo.getName());
-				groupUserService.save(groupUser);
-			}
-			return groupUser;
-		}
-		return null;
+	@GroupMemberOnly
+	public Group getSpecificGroupInfo(@PathVariable("groupId") long groupId) {
+		return groupService.get(groupId).orElseThrow(() -> new ResponseStatusException(
+			HttpStatus.NOT_FOUND, "Group not found"));
 	}
 
-	@GetMapping("/{groupId}/users")
-	public List<GroupUser> getUsersList(@PathVariable("groupId") long groupId) {
-		return groupUserService.findByGroupId(groupId);
+	@GetMapping("/{groupId}/members")
+	@GroupMemberOnly
+	public List<GroupUserResponseDto> listGroupMembers(@PathVariable("groupId") long groupId) {
+		return groupUserMembershipService.findByGroupId(groupId);
 	}
 
 	@PostMapping
-	public void addGroup(@RequestBody Name name) {
-		long groupId = System.currentTimeMillis();
+	public void createGroup(@RequestBody Name name) {
 		UserInfo userInfo = loggedInUserInfoService.getInfo();
-		groupUserService.addUser(groupId, userInfo.getEmail(), Role.ADMIN, name.getName(), userInfo.getName());
+		Group group = groupService.create(name.getName());
+		groupUserMembershipService.addMember(
+			group.getGroupId(), userInfo.getEmail(), Role.ADMIN);
 	}
 
 	@PostMapping("/{groupId}")
-	public void changeGroupName(@PathVariable("groupId") long groupId, @RequestBody @Valid UserIdWrapper userId) {
-		groupUserService.checkCurrentUserAdmin(groupId);
-		groupUserService.updateGroupName(groupId, userId.getUserId());
+	@GroupAdminOnly
+	public void changeGroupName(
+		@PathVariable("groupId") long groupId,
+		@RequestBody @Valid Name name) {
+		groupService.rename(groupId, name.getName());
 	}
 
 	@DeleteMapping("/{groupId}")
+	@GroupAdminOnly
 	public void deleteGroup(@PathVariable("groupId") long groupId) {
-		groupUserService.checkCurrentUserAdmin(groupId);
-		groupUserService.deleteByGroupId(groupId);
+		asyncCalls.deleteGroup(groupId);
 	}
 
 	@PostMapping("/{groupId}/exit")
+	@GroupMemberOnly
 	public void exitFromGroup(@PathVariable("groupId") long groupId) {
-		groupUserService.exitGroup(groupId);
+		UserInfo userInfo = loggedInUserInfoService.getInfo();
+		groupUserMembershipService.exitGroup(groupId, userInfo.getEmail());
 	}
 
-	@PostMapping("/{groupId}/remove-user")
-	public void removeUser(@PathVariable("groupId") long groupId, @RequestBody @Valid UserIdWrapper userId) {
-		groupUserService.checkCurrentUserAdmin(groupId);
-		groupUserService.deleteByGroupIdAndUserId(groupId, userId.getUserId());
-		if (groupUserService.findByGroupId(groupId).isEmpty()) {
-			expenseCoordinator.deleteExpenses(groupId);
-		}
+	@DeleteMapping("/{groupId}/remove-user")
+	@GroupAdminOnly
+	public void removeUser(
+		@PathVariable("groupId") long groupId,
+		@RequestBody @Valid UserIdWrapper userId) {
+		groupUserMembershipService.remove(groupId, userId.getUserId());
 	}
 
 	@PostMapping("/{groupId}/add-user")
-	public void addUser(@PathVariable("groupId") long groupId, @RequestBody @Valid UserIdWrapper userId) {
-		groupUserService.checkCurrentUserAdmin(groupId);
-		Optional<GroupUser> currentUser = groupUserService.findByGroupIdAndUserId(
-			groupId, loggedInUserInfoService.getInfo().getEmail());
-		groupUserService.addUser(
-			groupId, userId.getUserId(), Role.MEMBER, currentUser.get().getGroupName(), "");
+	@GroupAdminOnly
+	public void addUser(
+		@PathVariable("groupId") long groupId,
+		@RequestBody @Valid UserIdWrapper userId) {
+		groupUserMembershipService.addMember(groupId, userId.getUserId(), Role.MEMBER);
 	}
 
 	@PostMapping("/{groupId}/change-user-permissions")
+	@GroupAdminOnly
 	public void changeUserPermission(
 		@PathVariable("groupId") long groupId,
 		@RequestBody @Valid NewUserPermissionRequest request) {
-		groupUserService.checkCurrentUserAdmin(groupId);
-		groupUserService.changeUserPermission(groupId, request.getUserId(), request.getRole());
+		groupUserMembershipService.updateMemberRole(
+			groupId, request.getUserId(), request.getRole());
 	}
 
 
