@@ -20,6 +20,10 @@ public class GroupUserMembershipService {
 	@Autowired
 	private AsyncCalls asyncCalls;
 
+	public Optional<GroupUserResponseDto> findByGroupIdAndUserId(Long groupId, String userId) {
+		return repo.findByGroupIdAndUserId(groupId, userId).map(this::convert);
+	}
+
 	public List<GroupUserResponseDto> findByGroupId(Long groupId) {
 		return convert(repo.findByGroupId(groupId));
 	}
@@ -45,12 +49,12 @@ public class GroupUserMembershipService {
 	}
 
 	public void exitGroup(long groupId, String userId) {
-		Optional<GroupUserMembership> opt = repo.findByGroupIdAndUserId(groupId, userId);
+		Optional<Role> opt = repo.findRoleByGroupIdAndUserId(groupId, userId);
 		if (opt.isEmpty()) {
 			return;
 		}
 		remove(groupId, userId);
-		Role role = opt.get().getRole();
+		Role role = opt.get();
 		if (Role.MEMBER == role) {
 			return;
 		}
@@ -71,14 +75,19 @@ public class GroupUserMembershipService {
 
 	private List<GroupUserResponseDto> convert(List<GroupUserProjection> list) {
 		return list.stream()
-			.map(obj ->
-				new GroupUserResponseDto(
-					obj.getUserId(),
-					obj.getUserName(),
-					obj.getGroupId(),
-					obj.getGroupName(),
-					obj.getRole()))
+			.map(this::convert)
 			.toList();
 	}
+
+	private GroupUserResponseDto convert(
+		GroupUserProjection obj) {
+		return new GroupUserResponseDto(
+			obj.getUserId(),
+			obj.getUserName(),
+			obj.getGroupId(),
+			obj.getGroupName(),
+			obj.getRole());
+	}
+
 
 }

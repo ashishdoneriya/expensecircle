@@ -2,7 +2,6 @@ package com.csetutorials.expensecircle.security;
 
 import com.csetutorials.expensecircle.beans.Role;
 import com.csetutorials.expensecircle.beans.UserInfo;
-import com.csetutorials.expensecircle.entities.GroupUserMembership;
 import com.csetutorials.expensecircle.repositories.GroupUserMembershipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,7 +25,7 @@ public class GroupSecurityService {
 			return false;
 		}
 		String email = userInfo.getEmail();
-		Optional<GroupUserMembership> opt = repo.findByGroupIdAndUserId(groupId, email);
+		Optional<Role> opt = repo.findRoleByGroupIdAndUserId(groupId, email);
 		return opt.isPresent();
 	}
 
@@ -40,8 +39,8 @@ public class GroupSecurityService {
 			return false;
 		}
 		String email = userInfo.getEmail();
-		Optional<GroupUserMembership> opt = repo.findByGroupIdAndUserId(groupId, email);
-		return opt.isPresent() && opt.get().getRole() == Role.ADMIN;
+		Optional<Role> opt = repo.findRoleByGroupIdAndUserId(groupId, email);
+		return opt.isPresent() && opt.get() == Role.ADMIN;
 	}
 
 }

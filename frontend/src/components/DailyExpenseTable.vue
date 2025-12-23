@@ -1,6 +1,6 @@
 <template>
 	<el-table
-		:data="expenses"
+		:data="sortedExpenses"
 		:header-cell-class-name="cellStyle"
 		table-layout="auto"
 		:cell-class-name="cellStyle"
@@ -24,11 +24,13 @@
 </template>
 
 <script setup>
-	import { useGroupStore } from "@/stores/group";
 	import { useRoute, useRouter } from "vue-router";
+	import { useGroupStore } from "@/stores/group";
+	import { usePreferenceStore } from "@/stores/preferenceStore";
+
 	const route = useRoute();
 	const router = useRouter();
-
+	const preferenceStore = usePreferenceStore();
 	const group = useGroupStore();
 	const props = defineProps({
 		expenses: {
@@ -55,6 +57,31 @@
 	function openExpense(expense) {
 		router.push(`/groups/${group.groupId}/expense/${expense.expenseId}`);
 	}
+
+	// This computed property will watch both 'expenses' and 'preferenceStore.sortOrder'
+	const sortedExpenses = computed(() => {
+		const order = preferenceStore.sortOrder;
+
+		// Create a shallow copy using the spread operator [...] to avoid mutating the original prop
+		return expenses.value.sort((obj1, obj2) => {
+			if (order === "DateNewestToOldest") {
+				return obj2.expenseId - obj1.expenseId;
+			} else if (order === "AmountLowToHigh") {
+				if (obj1.amount === obj2.amount) {
+					return obj1.expenseId - obj2.expenseId;
+				}
+				return obj1.amount - obj2.amount;
+			} else if (order === "AmountHighToLow") {
+				if (obj1.amount === obj2.amount) {
+					return obj2.expenseId - obj1.expenseId;
+				}
+				return obj2.amount - obj1.amount;
+			} else {
+				// Default: Date Oldest to Newest (or ID based)
+				return obj1.expenseId - obj2.expenseId;
+			}
+		});
+	});
 </script>
 
 <style>
@@ -73,6 +100,6 @@
 		white-space: nowrap;
 	}
 	.cursorPointer {
-		cursor:pointer;
+		cursor: pointer;
 	}
 </style>

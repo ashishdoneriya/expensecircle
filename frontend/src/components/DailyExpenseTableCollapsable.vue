@@ -2,9 +2,9 @@
 	<div class="custom-collapse">
 		<div class="header" @click="toggle">
 			<div class="left">
-				{{ props.dayOfMonth }}&nbsp;{{
-					monthsName[props.month - 1]
-				}}&nbsp;{{ props.year }}
+				{{ props.dayOfMonth }}&nbsp;{{ monthsName[props.month - 1] }}&nbsp;{{
+					props.year
+				}}
 			</div>
 			<div class="right">
 				&#8377;&nbsp;{{ props.amount }}
@@ -20,7 +20,7 @@
 		</div>
 		<transition name="collapse">
 			<div class="content" v-show="isOpen && !isLoading">
-				<DailyExpenseTable :expenses="expenses" />
+				<DailyExpenseTable :expenses="sortedList" />
 			</div>
 		</transition>
 	</div>
@@ -32,8 +32,10 @@
 	import DailyExpenseTable from "@/components/DailyExpenseTable.vue";
 	import * as api from "@/api/api";
 	import { useGroupStore } from "@/stores/group";
+	import { usePreferenceStore } from "@/stores/preferenceStore";
 
 	const group = useGroupStore();
+	const preferenceStore = usePreferenceStore();
 
 	const props = defineProps({
 		year: { type: Number },
@@ -41,7 +43,7 @@
 		dayOfMonth: { type: Number },
 		amount: { type: Number },
 		disabled: { type: Boolean },
-		categoryId: [String, Number]
+		categoryId: [String, Number],
 	});
 
 	const monthsName = [
@@ -85,13 +87,37 @@
 					props.year,
 					props.month,
 					props.dayOfMonth,
-					props.categoryId
+					props.categoryId,
 				)
 			).data;
 		} catch (error) {
 			console.log(error);
 		}
 	}
+
+	const sortedList = computed(() => {
+		const order = preferenceStore.sortOrder; // This is the "trigger"
+
+		// The moment store.sortOrder changes,
+		// this whole function runs again automatically.
+		return expenses.value.sort((obj1, obj2) => {
+			if (order == 'DateNewestToOldest') {
+				return obj2.expenseId - obj1.expenseId;
+			} else if (order == 'AmountLowToHigh') {
+				if (obj1.amount == obj2.amount) {
+						return obj1.expenseId - obj2.expenseId;
+				}
+				return obj1.amount - obj2.amount;
+			} else if (order == 'AmountHighToLow') {
+				if (obj1.amount == obj2.amount) {
+						return obj2.expenseId - obj1.expenseId;
+					}
+					return obj2.amount - obj1.amount;
+			} else {
+				return obj1.expenseId - obj2.expenseId;
+			}
+		});
+	});
 </script>
 
 <style scoped>

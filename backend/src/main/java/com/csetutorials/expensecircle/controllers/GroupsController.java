@@ -39,8 +39,11 @@ public class GroupsController {
 
 	@GetMapping("/{groupId}")
 	@GroupMemberOnly
-	public Group getSpecificGroupInfo(@PathVariable("groupId") long groupId) {
-		return groupService.get(groupId).orElseThrow(() -> new ResponseStatusException(
+	public GroupUserResponseDto getSpecificGroupInfo(@PathVariable("groupId") long groupId) {
+		UserInfo userInfo = loggedInUserInfoService.getInfo();
+		return groupUserMembershipService
+			.findByGroupIdAndUserId(groupId, userInfo.getEmail())
+			.orElseThrow(() -> new ResponseStatusException(
 			HttpStatus.NOT_FOUND, "Group not found"));
 	}
 

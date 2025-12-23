@@ -61,7 +61,6 @@
 				"
 				@change="refresh"
 				:editable="false" />
-
 			<el-icon class="cursorPointer" @click="loadNext" v-if="!disableAll">
 				<ArrowRightBold />
 			</el-icon>
@@ -70,27 +69,9 @@
 			</el-icon>
 		</div>
 		<div>
-			<el-select
-				v-model="selectedCategoryId"
-				@change="refresh"
-				clearable
-				:placeholder="!isMobile ? 'Filter Category' : 'Filter'"
-				:disabled="disableAll"
-				:loading="disableAll"
-				:style="!isMobile ? 'width: 140px' : ''"
-				:fallback-placements="['bottom-start']"
-				suffix-icon="Filter">
-				<template #header v-if="isMobile">
-					<span v-if="selectedCategoryId" @click="selectedCategoryId = ''">
-						Clear Filter
-					</span>
-					<span v-else>Select Category</span>
-				</template>
-				<el-option
-					v-for="category in group.categories"
-					:label="category.categoryName"
-					:value="category.categoryId" />
-			</el-select>
+			<el-button :icon="Operation" text @click="filterSortDialog = true">
+				<span v-if="!isMobile">Filter & Sort</span>
+			</el-button>
 		</div>
 	</el-row>
 	<el-row style="padding: 0px; margin: 0px">
@@ -185,16 +166,53 @@
 		icon="Plus"
 		size="large"
 		@click="addExpense()"></el-button>
+	<el-dialog v-model="filterSortDialog" :title=" isMobile ? '' : 'Filter & Sort'">
+    <el-form :label-position="isMobile ? 'top' : 'left'">
+      <el-form-item label="Filter Category" label-width="120">
+        <el-select
+				v-model="selectedCategoryId"
+				@change="refresh"
+				clearable
+				:placeholder="!isMobile ? 'Filter Category' : 'Filter'"
+				:disabled="disableAll"
+				:loading="disableAll"
+				:fallback-placements="['bottom-start']"
+				suffix-icon="Filter">
+				<template #header v-if="isMobile">
+					<span v-if="selectedCategoryId" @click="selectedCategoryId = ''">
+						Clear Filter
+					</span>
+					<span v-else>Select Category</span>
+				</template>
+				<el-option
+					v-for="category in group.categories"
+					:label="category.categoryName"
+					:value="category.categoryId" />
+			</el-select>
+      </el-form-item>
+      <el-form-item label="Sort By" label-width="120" v-if="preferenceStore.sortOrder">
+        <el-select v-model="preferenceStore.sortOrder" @change="sort">
+          <el-option label="Date (Newest First)" value="DateNewestToOldest" />
+          <el-option label="Date (Oldest First)" value="DateOldestToNewest" />
+			 <el-option label="Amount (High to Low)" value="AmountHighToLow" />
+			 <el-option label="Amount (Low to High)" value="AmountLowToHigh" />
+        </el-select>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
 </template>
 
 <script setup>
 	import { ref, onMounted } from "vue";
 	import { useRoute, useRouter } from "vue-router";
 	import { useGroupStore } from "@/stores/group";
+	import { usePreferenceStore} from "@/stores/preferenceStore";
 	import * as api from "@/api/api";
 	import DailyExpenseTable from "@/components/DailyExpenseTable.vue";
 	import DailyExpenseTableCollapsable from "@/components/DailyExpenseTableCollapsable.vue";
 	import { setLastExpensesDate } from "@/utils/lastDateStorage";
+	import { Operation } from '@element-plus/icons-vue'
+
 
 	const isMobile = window.innerWidth <= 720;
 	const disableAll = ref(true);
@@ -211,6 +229,8 @@
 	const route = useRoute();
 	const router = useRouter();
 	const datePicker = ref(null);
+	const filterSortDialog = ref(false);
+	const preferenceStore = usePreferenceStore()
 
 	const formattedDate = computed(() => {
 		if (intervalType.value == "Daily") {
@@ -345,6 +365,7 @@
 	}
 
 	async function refresh() {
+		filterSortDialog.value = false;
 		writeQueryParams();
 		if (intervalType.value == "Daily") {
 			await fetchDailyExpenses();
@@ -414,7 +435,6 @@
 				month.value,
 				selectedCategoryId.value,
 			);
-			data.data.sort((obj1, obj2) => obj1.dayOfMonth - obj1.dayOfMonth);
 			monthlyBreakDown.value = data.data;
 			let total = 0;
 			for (let breakdown of monthlyBreakDown.value) {
@@ -424,6 +444,7 @@
 		} catch (error) {
 			console.log(error);
 		}
+		sort();
 		disableAll.value = false;
 	}
 
@@ -432,6 +453,33 @@
 			path: `/groups/${group.groupId}/expense`,
 			query: { timestamp: datePickerDate.value.getTime() },
 		});
+	}
+
+	function sort() {
+		filterSortDialog.value = false;
+		if (intervalType.value == 'Monthly') {
+			if (preferenceStore.sortOrder == 'DateNewestToOldest') {
+				monthlyBreakDown.value.sort((obj1, obj2) => obj2.dayOfMonth - obj1.dayOfMonth);
+			} else if (preferenceStore.sortOrder == 'AmountLowToHigh') {
+				monthlyBreakDown.value.sort((obj1, obj2) => {
+					if (obj1.amount == obj2.amount) {
+						return obj1.dayOfMonth - obj2.dayOfMonth;
+					}
+					return obj1.amount - obj2.amount;
+				});
+			} else if (preferenceStore.sortOrder == 'AmountHighToLow') {
+				monthlyBreakDown.value.sort((obj1, obj2) => {
+					if (obj1.amount == obj2.amount) {
+						return obj2.dayOfMonth - obj1.dayOfMonth;
+					}
+					return obj2.amount - obj1.amount;
+				});
+			} else {
+				monthlyBreakDown.value.sort((obj1, obj2) => obj1.dayOfMonth - obj2.dayOfMonth);
+			}
+
+		}
+
 	}
 </script>
 

@@ -21,8 +21,12 @@ public interface GroupUserMembershipRepository extends JpaRepository<GroupUserMe
 	@Query("select g.groupId as groupId, g.groupName as groupName, gu.role as role from Group g JOIN GroupUserMembership gu on g.groupId = gu.groupId and gu.userId = :userId")
 	List<GroupUserProjection> findByUserId(@Param("userId") String userId);
 
-	@Query("select gu from GroupUserMembership gu where gu.groupId = :groupId and gu.userId = :userId")
-	Optional<GroupUserMembership> findByGroupIdAndUserId(
+	@Query("select g.groupId as groupId, g.groupName as groupName, gu.role as role from Group g JOIN GroupUserMembership gu on g.groupId = gu.groupId and gu.userId = :userId")
+	Optional<GroupUserProjection> findByGroupIdAndUserId(
+		@Param("groupId") Long groupId, @Param("userId") String userId);
+
+	@Query("select gu.role from GroupUserMembership gu where gu.groupId = :groupId and gu.userId = :userId")
+	Optional<Role> findRoleByGroupIdAndUserId(
 		@Param("groupId") Long groupId, @Param("userId") String userId);
 
 	@Modifying
@@ -41,5 +45,4 @@ public interface GroupUserMembershipRepository extends JpaRepository<GroupUserMe
 	@Transactional
 	@Query("DELETE from GroupUserMembership gu WHERE gu.id.groupId = :groupId")
     void deleteByGroupId(@Param("groupId") long groupId);
-
 }
