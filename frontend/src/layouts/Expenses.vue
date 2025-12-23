@@ -414,6 +414,7 @@
 				month.value,
 				selectedCategoryId.value,
 			);
+			data.data.sort((obj1, obj2) => obj1.dayOfMonth - obj1.dayOfMonth);
 			monthlyBreakDown.value = data.data;
 			let total = 0;
 			for (let breakdown of monthlyBreakDown.value) {

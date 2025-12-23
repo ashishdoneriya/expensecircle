@@ -4,7 +4,7 @@ module.exports = {
 		/*host: 'localhost', */
 		proxy: {
 			"/api": {
-				target: "http://localhost:8080", // Your Spring Boot backend URL
+				target: "https://expensecircle.com", // Your Spring Boot backend URL
 				changeOrigin: true,
 			},
 		},

@@ -150,6 +150,7 @@
 					duration: 1200,
 					offset: window.innerHeight - 100,
 				});
+				category.categoryName = value;
 			} catch (error) {
 				ElMessage({
 					message: "Unable to change the name",

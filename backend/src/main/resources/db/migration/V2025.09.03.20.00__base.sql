@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `groupUsers` (
 	PRIMARY KEY (`groupId`,`userId`)
 );
 
-CREATE TABLE `groupCategories` (
+CREATE TABLE IF NOT EXISTS `groupCategories` (
 	`groupId` bigint(20) NOT NULL,
 	`categoryId` bigint(20) NOT NULL,
 	`categoryName` varchar(100) DEFAULT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE `groupCategories` (
   PRIMARY KEY (`categoryId`,`groupId`)
 );
 
-CREATE TABLE `groupTags` (
+CREATE TABLE IF NOT EXISTS `groupTags` (
 	`tagId` bigint(20) NOT NULL,
 	`groupId` bigint(20) NOT NULL,
 	`orderNumber` bigint(20) DEFAULT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE `groupTags` (
 	PRIMARY KEY (`groupId`,`tagId`)
 );
 
-CREATE TABLE `expenses` (
+CREATE TABLE IF NOT EXISTS `expenses` (
 	`groupId` bigint(20) NOT NULL,
 	`expenseId` bigint(20) NOT NULL,
 	`amount` bigint(20) NOT NULL,
@@ -47,9 +47,22 @@ CREATE TABLE `expenses` (
 	PRIMARY KEY (`expenseId`,`groupId`)
 );
 
-CREATE TABLE `expenseTags` (
+CREATE TABLE IF NOT EXISTS `expenseTags` (
 	`groupId` bigint(20),
 	`expenseId` bigint(20),
 	`tagId` bigint(20),
 	PRIMARY KEY (`groupId`,`expenseId`, `tagId`)
+);
+
+CREATE TABLE IF NOT EXISTS `groupInvites` (
+	`groupId` bigint(20) NOT NULL,
+	`inviteId` bigint(20) NOT NULL,
+	`invitedUserId` varchar(255),
+	`invitedEmail` varchar(255) NOT NULL,
+	`inviterUserId` varchar(255),
+	`status` VARCHAR(20) NOT NULL,
+	createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	expiresAt TIMESTAMP NOT NULL,
+	consumedAt TIMESTAMP,
+	PRIMARY KEY (`groupId`,`inviteId`)
 );

@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -48,5 +49,20 @@ public class GroupCategoryService {
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public void createDefaultCategories(long groupId) {
+		List<String> categories = List.of(
+			"Home Supplies", "Outside Food", "Health & Medical", "Clothes",
+			"Personal Care", "Transportation", "Education & Learning", "Child Care",
+			"Entertainment", "Home Maintenance", "Subscriptions & Recharges",
+			"Gadgets", "Social & Occasions", "Insurance & Pension Plans", "Investments", "Loans");
+
+		int count = 1;
+		List<GroupCategory> gcList = new ArrayList<>();
+		for (String category: categories) {
+			gcList.add(new GroupCategory(groupId, count, category, count++));
+		}
+		repo.saveAll(gcList);
 	}
 }

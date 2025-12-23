@@ -111,7 +111,7 @@ export default defineConfig({
 		port: 3000,
 		proxy: {
 			"/api": {
-				target: "http://localhost:8080", // Your Spring Boot backend URL
+				target: "https://expensecircle.com", // Your Spring Boot backend URL
 				changeOrigin: true,
 				//       rewrite: (path) => path.replace(/^\/api/, ''),  // Optional: Rewrites '/api' if necessary
 			},
