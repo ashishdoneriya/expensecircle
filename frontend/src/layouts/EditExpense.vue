@@ -20,9 +20,7 @@
 				</el-form-item>
 
 				<el-form-item label="Category">
-					<el-select
-						v-model="form.categoryId"
-						placeholder="Select Category">
+					<el-select v-model="form.categoryId" placeholder="Select Category">
 						<el-option
 							v-for="category in group.categories"
 							:label="category.categoryName"
@@ -69,7 +67,7 @@
 						<el-option
 							v-for="tag in group.tags"
 							:label="tag.tagName"
-							:value="tag.tagId"/>
+							:value="tag.tagId" />
 					</el-select>
 				</el-form-item>
 
@@ -78,7 +76,7 @@
 					v-if="
 						!(
 							expense.ownerUserId == expense.lastChangedByUserId &&
-							expense.ownerUserId == userStore.email
+							expense.ownerUserId == userStore.userId
 						)
 					">
 					<el-text>{{ expense.ownerUserId }}</el-text>
@@ -89,17 +87,14 @@
 					v-if="
 						!(
 							expense.ownerUserId == expense.lastChangedByUserId &&
-							expense.ownerUserId == userStore.email
+							expense.ownerUserId == userStore.userId
 						)
 					">
 					<el-text>{{ expense.lastChangedByUserId }}</el-text>
 				</el-form-item>
 
 				<el-form-item :label="isMobile ? '' : ' '">
-					<el-button
-						type="primary"
-						@click="onSubmit"
-						:disabled="!form.amount">
+					<el-button type="primary" @click="onSubmit" :disabled="!form.amount">
 						Update
 					</el-button>
 					<el-button
@@ -154,9 +149,9 @@
 		let expenseId = route.params.expenseId;
 		let groupId = route.params.groupId;
 		if (!group.isInitialized) {
-			group.initialize(Number(groupId));
+			group.initialize(groupId);
 		}
-		if (Number(route.params.expenseId)) {
+		if (route.params.expenseId) {
 			expense.value = (await api.getExpense(group.groupId, expenseId)).data;
 			form.timestamp = expense.value.timestamp;
 			form.categoryId = expense.value.categoryId;
@@ -176,8 +171,18 @@
 			});
 			await api.deleteExpense(group.groupId, expense.value.expenseId);
 			goBack();
-		} catch (error) {
+		} catch (error) {}
+	}
 
+	function isActuallyBase64(str) {
+		try {
+			// Step 1: Structural check
+			if (!/^[A-Za-z0-9+/]*={0,2}$/.test(str)) return false;
+
+			// Step 2: Attempt decoding
+			return btoa(atob(str)) === str;
+		} catch (err) {
+			return false;
 		}
 	}
 
@@ -190,11 +195,12 @@
 					amount: form.amount,
 					categoryId: form.categoryId,
 					description: form.description,
-					tags: form.tags.filter((item) => typeof item === "number"),
-					newTags: form.tags.filter((item) => typeof item === "string"),
+					tags: form.tags.filter((item) => isActuallyBase64(item)),
+					newTags: form.tags.filter((item) => !isActuallyBase64(item)),
 				};
 
-				api.updateExpense(group.groupId, expense.value.expenseId, obj)
+				api
+					.updateExpense(group.groupId, expense.value.expenseId, obj)
 					.then(() => {
 						ElMessage({
 							message: "Updated",

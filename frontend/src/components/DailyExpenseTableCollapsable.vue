@@ -43,7 +43,7 @@
 		dayOfMonth: { type: Number },
 		amount: { type: Number },
 		disabled: { type: Boolean },
-		categoryId: [String, Number],
+		categoryId: [String],
 	});
 
 	const monthsName = [
@@ -102,19 +102,19 @@
 		// this whole function runs again automatically.
 		return expenses.value.sort((obj1, obj2) => {
 			if (order == 'DateNewestToOldest') {
-				return obj2.expenseId - obj1.expenseId;
+				return obj2.timestamp - obj1.timestamp;
 			} else if (order == 'AmountLowToHigh') {
 				if (obj1.amount == obj2.amount) {
-						return obj1.expenseId - obj2.expenseId;
+						return obj1.timestamp - obj2.timestamp;
 				}
 				return obj1.amount - obj2.amount;
 			} else if (order == 'AmountHighToLow') {
 				if (obj1.amount == obj2.amount) {
-						return obj2.expenseId - obj1.expenseId;
+						return obj2.timestamp - obj1.timestamp;
 					}
 					return obj2.amount - obj1.amount;
 			} else {
-				return obj1.expenseId - obj2.expenseId;
+				return obj1.timestamp - obj2.timestamp;
 			}
 		});
 	});

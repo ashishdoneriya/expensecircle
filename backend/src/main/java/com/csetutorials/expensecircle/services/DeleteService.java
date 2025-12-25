@@ -29,28 +29,28 @@ public class DeleteService {
 	@Autowired
 	private ExpenseRepository expenseRepository;
 
-	public void deleteGroup(long groupId) {
-		groupRepository.deleteByGroupId(groupId);
+	public void deleteGroup(String groupId) {
+		expenseTagRepository.deleteByGroupId(groupId);
+		expenseRepository.deleteByGroupId(groupId);
 		groupCategoryRepository.deleteByGroupId(groupId);
 		groupTagRepository.deleteByGroupId(groupId);
 		groupUserMembershipRepository.deleteByGroupId(groupId);
-		expenseTagRepository.deleteByGroupId(groupId);
-		expenseRepository.deleteByGroupId(groupId);
+		groupRepository.deleteByGroupId(groupId);
 	}
 
-	public void deleteCategory(long groupId, long categoryId) {
-		groupCategoryRepository.deleteByCategoryId(groupId, categoryId);
+	public void deleteCategory(String groupId, String categoryId) {
 		expenseRepository.deleteByCategoryId(groupId, categoryId);
+		groupCategoryRepository.deleteByCategoryId(groupId, categoryId);
 	}
 
-	public void deleteTag(long groupId, long tagId) {
-		groupTagRepository.deleteByGroupIdAndTagId(groupId, tagId);
+	public void deleteTag(String groupId, String tagId) {
 		expenseTagRepository.deleteByGroupIdAndTagId(groupId, tagId);
+		groupTagRepository.deleteByGroupIdAndTagId(groupId, tagId);
 	}
 
-	public void deleteExpense(long groupId, long expenseId) {
-		expenseRepository.deleteByGroupIdAndExpenseId(groupId, expenseId);
+	public void deleteExpense(String groupId, String expenseId) {
 		expenseTagRepository.deleteByGroupIdAndExpenseId(groupId, expenseId);
+		expenseRepository.deleteByGroupIdAndExpenseId(groupId, expenseId);
 	}
 
 }

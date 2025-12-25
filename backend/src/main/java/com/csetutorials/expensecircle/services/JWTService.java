@@ -30,7 +30,7 @@ public class JWTService {
 	public String serialize(UserInfo userInfo) {
 
 		JWSObject jwsObject = new JWSObject(new JWSHeader(JWSAlgorithm.HS256),
-			new Payload(Map.of("name", userInfo.getName(), "email", userInfo.getEmail(), "picture", userInfo.getPicture())));
+			new Payload(Map.of("userId", userInfo.getUserId(), "name", userInfo.getName(), "email", userInfo.getEmail(), "picture", userInfo.getPicture())));
 		try {
 			jwsObject.sign(signer);
 		} catch (JOSEException e) {
@@ -46,7 +46,7 @@ public class JWTService {
 				throw new Exception("Cannot verify jwt object");
 			}
 			Map<String, Object> map = jwsObject.getPayload().toJSONObject();
-			return new UserInfo((String) map.get("name"), (String) map.get("email"), (String) map.get("picture"));
+			return new UserInfo((String) map.get("userId"), (String) map.get("name"), (String) map.get("email"), (String) map.get("picture"));
 		} catch (Exception e) {
 			throw new JWTDeserializationException(e);
 		}

@@ -5,6 +5,7 @@ import com.csetutorials.expensecircle.beans.UpdateExpenseRequest;
 import com.csetutorials.expensecircle.dto.ExpenseResponseDto;
 import com.csetutorials.expensecircle.entities.Expense;
 
+import com.csetutorials.expensecircle.entities.GroupTag;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,22 +24,22 @@ public class ExpenseCoordinator {
 	@Autowired
 	private ExpenseTagService expenseTagService;
 
-	public void addExpense(long groupId, AddExpenseRequest request, @NonNull String ownerUserId) {
+	public void addExpense(String groupId, AddExpenseRequest request, @NonNull String ownerUserId) {
 		
-		expenseService.addExpense(groupId, request, ownerUserId);
+		String expenseId = expenseService.addExpense(groupId, request, ownerUserId);
 
 		if (request.getTags() == null) {
 			request.setTags(Collections.emptySet());
 		}
 		groupTagService.verifyTags(groupId, request.getTags());
-		List<Long> newTags = groupTagService.addTags(groupId, request.getNewTags()).stream().map(obj -> obj.getTagId()).toList();
-		List<Long> finalTagsList = new ArrayList<>();
+		List<String> newTags = groupTagService.addTags(groupId, request.getNewTags()).stream().map(GroupTag::getTagId).toList();
+		List<String> finalTagsList = new ArrayList<>();
 		finalTagsList.addAll(request.getTags());
 		finalTagsList.addAll(newTags);
-		expenseTagService.addAll(groupId, request.getTimestamp(), finalTagsList);
+		expenseTagService.addAll(groupId, expenseId, finalTagsList);
 	}
 
-	public void updateExpense(long groupId, String email, UpdateExpenseRequest request) {
+	public void updateExpense(String groupId, String email, UpdateExpenseRequest request) {
 		
 		expenseService.updateExpense(groupId, email, request);
 
@@ -46,8 +47,8 @@ public class ExpenseCoordinator {
 			request.setTags(Collections.emptySet());
 		}
 		groupTagService.verifyTags(groupId, request.getTags());
-		List<Long> newTags = groupTagService.addTags(groupId, request.getNewTags()).stream().map(obj -> obj.getTagId()).toList();
-		List<Long> finalTagsList = new ArrayList<>();
+		List<String> newTags = groupTagService.addTags(groupId, request.getNewTags()).stream().map(GroupTag::getTagId).toList();
+		List<String> finalTagsList = new ArrayList<>();
 		finalTagsList.addAll(request.getTags());
 		finalTagsList.addAll(newTags);
 
@@ -55,13 +56,13 @@ public class ExpenseCoordinator {
 		expenseTagService.addAll(groupId, request.getExpenseId(), finalTagsList);
 	}
 
-	public Optional<ExpenseResponseDto> findByGroupIdAndExpenseId(long groupId, long expenseId) {
+	public Optional<ExpenseResponseDto> findByGroupIdAndExpenseId(String groupId, String expenseId) {
 		Optional<Expense> opt = expenseService.findByGroupIdAndExpenseId(groupId, expenseId);
 		if (opt.isEmpty()) {
 			return Optional.empty();
 		}
 		Expense e = opt.get();
-		List<Long> tagIds = expenseTagService.findByGroupIdAndExpenseId(groupId, expenseId);
+		List<String> tagIds = expenseTagService.findByGroupIdAndExpenseId(groupId, expenseId);
 		return Optional.of(new ExpenseResponseDto(e.getExpenseId(), e.getTimestamp(), e.getCategoryId(), e.getAmount(), e.getDescription(), tagIds, e.getOwnerUserId(), e.getLastChangedByUserId()));
 	}
 

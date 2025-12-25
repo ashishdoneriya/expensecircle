@@ -24,24 +24,22 @@ public class GroupTagsController {
 	private AsyncCalls asyncCalls;
 
 	@GetMapping
-	public List<GroupTag> getTags(@PathVariable("groupId") long groupId) {
+	public List<GroupTag> getTags(@PathVariable("groupId") String groupId) {
 		List<GroupTag> list = groupTagService.getTags(groupId);
 		list.sort(Comparator.comparingLong(GroupTag::getOrderNumber));
 		return list;
 	}
 
 	@PostMapping
-	public long addTag(
-		@PathVariable("groupId") long groupId,
+	public String addTag(
+		@PathVariable("groupId") String groupId,
 		@Valid @RequestBody Name name) {
-		long timestamp = System.currentTimeMillis();
-		groupTagService.addTag(groupId, timestamp, name.getName());
-		return timestamp;
+		return groupTagService.addTag(groupId, name.getName());
 	}
 
 	@PostMapping("/change-tags-order")
 	public void changeTagsOrder(
-		@PathVariable("groupId") long groupId,
+		@PathVariable("groupId") String groupId,
 		@RequestBody List<NewOrder> list) {
 		if (list == null || list.isEmpty()) {
 			return;
@@ -51,16 +49,16 @@ public class GroupTagsController {
 
 	@PutMapping("/{tagId}")
 	public void renameTag(
-		@PathVariable("groupId") long groupId,
-		@PathVariable("tagId") long tagId,
+		@PathVariable("groupId") String groupId,
+		@PathVariable("tagId") String tagId,
 		@Valid @RequestBody Name name) {
 		groupTagService.renameTag(groupId, tagId, name.getName());
 	}
 
 	@DeleteMapping("/{tagId}")
 	public void deleteTag(
-		@PathVariable("groupId") long groupId,
-		@PathVariable("tagId") long tagId) {
+		@PathVariable("groupId") String groupId,
+		@PathVariable("tagId") String tagId) {
 		asyncCalls.deleteTag(groupId, tagId);
 	}
 

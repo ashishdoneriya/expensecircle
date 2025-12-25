@@ -95,7 +95,7 @@
 					<el-table-column label="Category" align="left">
 						<template #default="scope">
 							<el-tag
-								v-if="scope.row.categoryId != 0"
+								v-if="scope.row.categoryId"
 								type="primary"
 								@click="openCategogyExpenses(scope.row.categoryId)"
 								class="cursorPointer">
@@ -167,9 +167,9 @@
 					table-layout="auto"
 					v-loading="disableAll"
 					:default-sort="{ prop: 'month', order: 'ascending' }">
-					<el-table-column label="Month" prop="month" sortable align="left">
+					<el-table-column label="Month" sortable sort-by="month" align="left">
 						<template #default="scope">
-							<el-tag v-if="scope.row.categoryId != 0" type="primary">
+							<el-tag type="primary">
 								{{ monthsName[scope.row.month - 1] }}
 							</el-tag>
 						</template>
@@ -381,13 +381,12 @@
 			cache.date &&
 			cache.groupId &&
 			typeof cache.date === "string" &&
-			!isNaN(Number(cache.groupId)) &&
 			/^\d{4}-\d{2}-\d{2}$/.test(cache.date)
 		) {
 			const d = cache.date.split("-")[2];
-			const prevGroupId = Number(cache.groupId);
+			const prevGroupId = cache.groupId;
 
-			const curGroupId = Number(group.groupId);
+			const curGroupId = group.groupId;
 
 			if (prevGroupId === curGroupId) {
 				day = d;

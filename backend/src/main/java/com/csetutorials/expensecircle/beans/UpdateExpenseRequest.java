@@ -9,17 +9,17 @@ import java.util.Set;
 @Setter
 public class UpdateExpenseRequest {
 
-	private long expenseId;
+	private String expenseId;
 
 	private long amount;
 
 	private String description;
 
-	private long categoryId;
+	private String categoryId;
 
 	private long newTimestamp;
 
-	private Set<Long> tags;
+	private Set<String> tags;
 
 	private Set<String> newTags;
 

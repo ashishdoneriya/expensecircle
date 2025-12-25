@@ -19,10 +19,10 @@ import org.hibernate.annotations.DynamicUpdate;
 public class GroupCategory {
 
 	@Id
-	private long groupId;
+	private String groupId;
 
 	@Id
-	private long categoryId;
+	private String categoryId;
 
 	@Column(length = 100)
 	private String categoryName;

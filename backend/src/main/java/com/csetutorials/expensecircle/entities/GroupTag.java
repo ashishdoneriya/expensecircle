@@ -17,10 +17,10 @@ import lombok.Setter;
 public class GroupTag {
 
 	@Id
-	private long groupId;
+	private String groupId;
 
 	@Id
-	private long tagId;
+	private String tagId;
 
 	@Column
 	private String tagName;

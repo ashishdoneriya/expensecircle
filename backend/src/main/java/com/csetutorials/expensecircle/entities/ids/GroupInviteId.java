@@ -13,8 +13,8 @@ import java.io.Serializable;
 public class GroupInviteId implements Serializable {
 
 	@Id
-	Long groupId;
+	String groupId;
 	@Id
-	Long inviteId;
+	String inviteId;
 
 }

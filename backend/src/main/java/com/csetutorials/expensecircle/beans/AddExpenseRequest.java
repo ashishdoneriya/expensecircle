@@ -15,9 +15,9 @@ public class AddExpenseRequest {
 
 	private String description;
 
-	private long categoryId;
+	private String categoryId;
 
-	private Set<Long> tags;
+	private Set<String> tags; // ids
 
 	private Set<String> newTags;
 

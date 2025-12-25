@@ -216,9 +216,9 @@ export function removeUser(groupId, userId) {
 	});
 }
 
-export function addGroupMember(groupId, userId) {
+export function addGroupMember(groupId, email) {
 	return apiClient.post(`/groups/${groupId}/add-user`, {
-		userId: userId
+		email: email
 	});
 }
 

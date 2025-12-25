@@ -20,11 +20,11 @@ public class GroupUserMembershipService {
 	@Autowired
 	private AsyncCalls asyncCalls;
 
-	public Optional<GroupUserResponseDto> findByGroupIdAndUserId(Long groupId, String userId) {
+	public Optional<GroupUserResponseDto> findByGroupIdAndUserId(String groupId, String userId) {
 		return repo.findByGroupIdAndUserId(groupId, userId).map(this::convert);
 	}
 
-	public List<GroupUserResponseDto> findByGroupId(Long groupId) {
+	public List<GroupUserResponseDto> findByGroupId(String groupId) {
 		return convert(repo.findByGroupId(groupId));
 	}
 
@@ -34,21 +34,21 @@ public class GroupUserMembershipService {
 	}
 
 
-	public void addMember(Long groupId, String userId, Role role) {
+	public void addMember(String groupId, String email, Role role) {
 
 		GroupUserMembership membership = new GroupUserMembership();
-		membership.setUserId(userId);
+		membership.setUserId(email);
 		membership.setGroupId(groupId);
 		membership.setRole(role);
 		repo.save(membership);
 
 	}
 
-	public void remove(Long groupId, String userId) {
+	public void remove(String groupId, String userId) {
 		repo.deleteById(new GroupUserId(groupId, userId));
 	}
 
-	public void exitGroup(long groupId, String userId) {
+	public void exitGroup(String groupId, String userId) {
 		Optional<Role> opt = repo.findRoleByGroupIdAndUserId(groupId, userId);
 		if (opt.isEmpty()) {
 			return;
@@ -69,7 +69,7 @@ public class GroupUserMembershipService {
 		}
 	}
 
-	public void updateMemberRole(long groupId, String userId, Role role) {
+	public void updateMemberRole(String groupId, String userId, Role role) {
 		repo.updateMemberRole(groupId, userId, role);
 	}
 

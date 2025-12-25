@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class YearlyBreakdownByMonth {
 
-	private long groupId;
+	private String groupId;
 
 	private short year;
 

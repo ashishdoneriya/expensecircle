@@ -305,7 +305,7 @@
 			datePickerDate.value = convertToDate(route.query["date"]);
 		}
 		if (route.query["category"]) {
-			selectedCategoryId.value = Number(route.query["category"]);
+			selectedCategoryId.value = route.query["category"];
 		}
 	}
 

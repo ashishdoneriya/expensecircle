@@ -9,28 +9,21 @@ import org.springframework.stereotype.Service;
 public class AsyncCalls {
 
 	@Autowired
-	private UserService userService;
-
-	@Autowired
 	private DeleteService deleteService;
 
-	public void updateUserInfo(String userId, String name, String pictureUrl) {
-		userService.save(userId, name, pictureUrl);
-	}
-
-	public void deleteGroup(long groupId) {
+	public void deleteGroup(String groupId) {
 		deleteService.deleteGroup(groupId);
 	}
 
-	public void deleteCategory(long groupId, long categoryId) {
+	public void deleteCategory(String groupId, String categoryId) {
 		deleteService.deleteCategory(groupId, categoryId);
 	}
 
-	public void deleteTag(long groupId, long tagId) {
+	public void deleteTag(String groupId, String tagId) {
 		deleteService.deleteTag(groupId, tagId);
 	}
 
-	public void deleteExpense(long groupId, long expenseId) {
+	public void deleteExpense(String groupId, String expenseId) {
 		deleteService.deleteExpense(groupId, expenseId);
 	}
 

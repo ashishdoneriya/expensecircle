@@ -21,75 +21,75 @@ public class StatsController {
 
 	@GetMapping("/yearly-total")
 	public long getYearlyTotal(
-		@PathVariable("groupId") long groupId,
+		@PathVariable("groupId") String groupId,
 		@RequestParam("year") short year) {
 		return service.getYearlyTotalAmount(groupId, year);
 	}
 
 	@GetMapping("/monthly-total")
 	public long getMonthlyTotal(
-		@PathVariable("groupId") long groupId,
+		@PathVariable("groupId") String groupId,
 		@RequestParam("year") short year,
 		@RequestParam("month") byte month,
-		@RequestParam(name = "categoryId", required = false, defaultValue = "") String sCategoryId) {
-		if (sCategoryId.trim().isEmpty()) {
+		@RequestParam(name = "categoryId", required = false, defaultValue = "") String categoryId) {
+		if (categoryId.trim().isEmpty()) {
 			return service.getMonthlyTotalAmount(groupId, year, month);
 		} else {
-			return service.getMonthlyTotalByCategory(groupId, year, month, Long.parseLong(sCategoryId));
+			return service.getMonthlyTotalByCategory(groupId, year, month, categoryId);
 		}
 	}
 
 	@GetMapping("/daily-total")
 	public long getDailyTotal(
-		@PathVariable("groupId") long groupId,
+		@PathVariable("groupId") String groupId,
 		@RequestParam("year") short year,
 		@RequestParam("month") byte month,
 		@RequestParam("dayOfMonth") byte day,
-		@RequestParam(name = "categoryId", required = false, defaultValue = "") String sCategoryId) {
-		if (sCategoryId.trim().isEmpty()) {
+		@RequestParam(name = "categoryId", required = false, defaultValue = "") String categoryId) {
+		if (categoryId.trim().isEmpty()) {
 			return service.getDailyTotalAmount(groupId, year, month, day);
 		} else {
-			return service.getDailyTotalAmount(groupId, Long.parseLong(sCategoryId), year, month, day);
+			return service.getDailyTotalAmount(groupId, categoryId, year, month, day);
 		}
 	}
 
 	@GetMapping("/yearly-breakdown-by-month")
 	public List<MonthAmountProjection> getYearlyBreakdownByMonth(
-		@PathVariable("groupId") long groupId,
+		@PathVariable("groupId") String groupId,
 		@RequestParam("year") short year) {
 		return service.getYearlyBreakdownByMonth(groupId, year);
 	}
 
 	@GetMapping("/yearly-breakdown-by-category")
 	public List<CategoryAmountProjection> getYearlyBreakdownByCategory(
-		@PathVariable("groupId") long groupId,
+		@PathVariable("groupId") String groupId,
 		@RequestParam("year") short year) {
 		return service.getYearlyBreakdownByCategory(groupId, year);
 	}
 
 	@GetMapping("/yearly-breakdown-by-tag")
 	public List<TagAmountProjection> getYearlyBreakdownByTag(
-		@PathVariable("groupId") long groupId,
+		@PathVariable("groupId") String groupId,
 		@RequestParam("year") short year) {
 		return service.getYearlyBreakdownByTag(groupId, year);
 	}
 
 	@GetMapping("/monthly-breakdown-by-day")
 	public List<DayOfMonthAmountProjection> getMonthlyBreakdownByDay(
-		@PathVariable("groupId") long groupId,
+		@PathVariable("groupId") String groupId,
 		@RequestParam("year") short year,
 		@RequestParam("month") byte month,
-		@RequestParam(name = "categoryId", required = false, defaultValue = "") String sCategoryId) {
-		if (sCategoryId.trim().isEmpty()) {
+		@RequestParam(name = "categoryId", required = false, defaultValue = "") String categoryId) {
+		if (categoryId.trim().isEmpty()) {
 			return service.getMonthlyBreakdownByDay(groupId, year, month);
 		} else {
-			return service.getMonthlyBreakdownByDay(groupId, Long.parseLong(sCategoryId), year, month);
+			return service.getMonthlyBreakdownByDay(groupId, categoryId, year, month);
 		}
 	}
 
 	@GetMapping("/monthly-breakdown-by-category")
 	public List<CategoryAmountProjection> getMonthlyBreakdownByCategory(
-		@PathVariable("groupId") long groupId,
+		@PathVariable("groupId") String groupId,
 		@RequestParam("year") short year,
 		@RequestParam("month") byte month) {
 		return service.getMonthlyBreakdownByCategory(groupId, year, month);
@@ -97,7 +97,7 @@ public class StatsController {
 
 	@GetMapping("/monthly-breakdown-by-tag")
 	public List<TagAmountProjection> getMonthlyBreakdownByTag(
-		@PathVariable("groupId") long groupId,
+		@PathVariable("groupId") String groupId,
 		@RequestParam("year") short year,
 		@RequestParam("month") byte month) {
 		return service.getMonthlyBreakdownByTag(groupId, year, month);

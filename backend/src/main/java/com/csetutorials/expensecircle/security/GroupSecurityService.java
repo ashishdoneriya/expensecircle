@@ -15,7 +15,7 @@ public class GroupSecurityService {
 	@Autowired
 	private GroupUserMembershipRepository repo;
 
-	public boolean isMember(Long groupId) {
+	public boolean isMember(String groupId) {
 		var auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth == null) {
 			return false;
@@ -24,12 +24,11 @@ public class GroupSecurityService {
 		if (userInfo == null) {
 			return false;
 		}
-		String email = userInfo.getEmail();
-		Optional<Role> opt = repo.findRoleByGroupIdAndUserId(groupId, email);
+		Optional<Role> opt = repo.findRoleByGroupIdAndUserId(groupId, userInfo.getUserId());
 		return opt.isPresent();
 	}
 
-	public boolean isAdmin(Long groupId) {
+	public boolean isAdmin(String groupId) {
 		var auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth == null) {
 			return false;
@@ -38,8 +37,7 @@ public class GroupSecurityService {
 		if (userInfo == null) {
 			return false;
 		}
-		String email = userInfo.getEmail();
-		Optional<Role> opt = repo.findRoleByGroupIdAndUserId(groupId, email);
+		Optional<Role> opt = repo.findRoleByGroupIdAndUserId(groupId, userInfo.getUserId());
 		return opt.isPresent() && opt.get() == Role.ADMIN;
 	}
 

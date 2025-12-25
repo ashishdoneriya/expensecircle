@@ -15,21 +15,21 @@ import jakarta.transaction.Transactional;
 public interface ExpenseTagRepository extends JpaRepository<ExpenseTag, ExpenseTagId> {
 
 	List<ExpenseTag> findByGroupIdAndExpenseId(
-		@Param("groupId") Long groupId, @Param("expenseId") Long expenseId);
+		@Param("groupId") String groupId, @Param("expenseId") String expenseId);
 
 	@Modifying
 	@Transactional
 	@Query("delete from ExpenseTag et where et.groupId = :groupId and et.tagId = :tagId")
-    void deleteByGroupIdAndTagId(@Param("groupId") long groupId, @Param("tagId") long tagId);
+    void deleteByGroupIdAndTagId(@Param("groupId") String groupId, @Param("tagId") String tagId);
 
 	@Modifying
 	@Transactional
 	@Query("delete from ExpenseTag et where et.groupId = :groupId and et.expenseId = :expenseId")
-    void deleteByGroupIdAndExpenseId(@Param("groupId") long groupId, @Param("expenseId") long expenseId);
+    void deleteByGroupIdAndExpenseId(@Param("groupId") String groupId, @Param("expenseId") String expenseId);
 
 	@Modifying
 	@Transactional
 	@Query("delete from ExpenseTag et where et.groupId = :groupId")
-    void deleteByGroupId(@Param("groupId") long groupId);
+    void deleteByGroupId(@Param("groupId") String groupId);
 
 }

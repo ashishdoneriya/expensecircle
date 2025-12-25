@@ -15,7 +15,7 @@ public class ExpenseTagService {
 	@Autowired
 	private ExpenseTagRepository repo;
 
-	public void addAll(long groupId, long expenseId, Collection<Long> tagIds) {
+	public void addAll(String groupId, String expenseId, Collection<String> tagIds) {
 		repo.saveAll(
 			tagIds.stream()
 			.map(tagId -> new ExpenseTag(groupId, expenseId, tagId))
@@ -23,12 +23,12 @@ public class ExpenseTagService {
 		);
 	}
 
-    public void deleteByGroupIdAndExpenseId(long groupId, long expenseId) {
+    public void deleteByGroupIdAndExpenseId(String groupId, String expenseId) {
         repo.deleteByGroupIdAndExpenseId(groupId, expenseId);
     }
 
-	public List<Long> findByGroupIdAndExpenseId(long groupId, long expenseId) {
-		return repo.findByGroupIdAndExpenseId(groupId, expenseId).stream().map(obj -> obj.getTagId()).toList();
+	public List<String> findByGroupIdAndExpenseId(String groupId, String expenseId) {
+		return repo.findByGroupIdAndExpenseId(groupId, expenseId).stream().map(ExpenseTag::getTagId).toList();
 	}
 
 }

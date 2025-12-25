@@ -5,7 +5,7 @@ import { useUserStore } from "@/stores/user";
 
 export const useGroupStore = defineStore("groupStore", {
 	state: () => ({
-		groupId: 0,
+		groupId: "",
 		groupName: "",
 		categories: [],
 		categoriesMap: {},
@@ -44,7 +44,7 @@ export const useGroupStore = defineStore("groupStore", {
 			let member;
 			const userStore = useUserStore();
 			for (let i = 0; i < this.members.length; i++) {
-				if (this.members[i].userId == userStore.email) {
+				if (this.members[i].userId == userStore.userId) {
 					member = this.members[i];
 					this.members.splice(i, 1);
 					break;
@@ -69,10 +69,6 @@ export const useGroupStore = defineStore("groupStore", {
 
 		async addMember(email) {
 			await api.addGroupMember(this.groupId, email);
-			this.members.push({
-				"userId": email,
-				"role": 'USER'
-			})
 		},
 
 		getCategories() {
@@ -94,11 +90,11 @@ export const useGroupStore = defineStore("groupStore", {
 			try {
 				let response = await api.addCategory(this.groupId, categoryName);
 				this.categories.push({
-					categoryId: Number(response.data),
+					categoryId: response.data,
 					categoryName: categoryName,
 				});
 				this.categoriesMap[response.data] = categoryName;
-				return Number(response.data);
+				return response.data;
 			} catch (error) {
 				console.error("Error fetching categories:", error);
 			}
@@ -153,11 +149,11 @@ export const useGroupStore = defineStore("groupStore", {
 			try {
 				let response = await api.addTag(this.groupId, tagName);
 				this.tags.push({
-					tagId: Number(response.data),
+					tagId: response.data,
 					tagName: tagName,
 				});
 				this.tagsMap[response.data] = tagName;
-				return Number(response.data);
+				return response.data;
 			} catch (error) {
 				console.error("Error fetching tags:", error);
 			}
@@ -195,7 +191,7 @@ export const useGroupStore = defineStore("groupStore", {
 
 		clearInfo() {
 			this.isInitialized = false;
-			this.groupId = 0;
+			this.groupId = "";
 			this.groupInfo = null;
 			this.categories = [];
 			this.categoriesMap = {};

@@ -2,7 +2,7 @@ package com.csetutorials.expensecircle.projection;
 
 public interface TagAmountProjection {
 
-	long getTagId();
+	String getTagId();
 
 	long getAmount();
 

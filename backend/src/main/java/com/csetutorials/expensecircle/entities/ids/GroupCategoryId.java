@@ -13,10 +13,10 @@ import java.io.Serializable;
 public class GroupCategoryId implements Serializable {
 
 	@Id
-	private long groupId;
+	private String groupId;
 
 	@Id
-	private long categoryId;
+	private String categoryId;
 
 
 }

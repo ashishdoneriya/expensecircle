@@ -34,7 +34,7 @@
 							size="small"
 							:style="
 								group.groupInfo.role == 'ADMIN' &&
-								member.userId == userStore.email &&
+								member.userId == userStore.userId &&
 								group.members.length > 1
 									? 'margin-right:30px'
 									: ''
@@ -46,7 +46,7 @@
 							@command="handleRowActions"
 							v-if="
 								group.groupInfo.role == 'ADMIN' &&
-								member.userId != userStore.email
+								member.userId != userStore.userId
 							">
 							<img
 								src="@/assets/more-vertical.svg"
@@ -133,7 +133,7 @@
 			await group.addMember(newMemberId.value);
 			newMemberId.value = "";
 			ElMessage({
-				message: "Member Added",
+				message: "Invitation Sent",
 				type: "success",
 				duration: 1200,
 				offset: window.innerHeight - 100,

@@ -59,6 +59,7 @@
 		loginViaGoogleIdToken(response.credential).then((response) => {
 			response = response.data;
 			userStore.setUserInfo(
+				response.userId,
 				response.name,
 				response.email,
 				response.picture,

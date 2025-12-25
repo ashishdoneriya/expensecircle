@@ -17,8 +17,8 @@ import java.io.Serializable;
 public class ExpenseIdWrapper implements Serializable {
 
 	@Id
-	private long groupId;
+	private String groupId;
 	@Id
-	private long expenseId;
+	private String expenseId;
 
 }

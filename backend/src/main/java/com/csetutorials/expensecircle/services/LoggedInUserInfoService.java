@@ -12,6 +12,10 @@ public class LoggedInUserInfoService {
 		return loggedInUserInfo.get();
 	}
 
+	public String getId() {
+		return loggedInUserInfo.get().getUserId();
+	}
+
 	public void setInfo(UserInfo info) {
 		loggedInUserInfo.set(info);
 	}

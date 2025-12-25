@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 
 export const useUserStore = defineStore("user", {
 	state: () => ({
+		userId: "",
 		name: "",
 		email: "",
 		picture: "",
@@ -11,7 +12,8 @@ export const useUserStore = defineStore("user", {
 	}),
 	actions: {
 		// Set user information after login
-		setUserInfo(name, email, picture, serverAuthToken) {
+		setUserInfo(userId, name, email, picture, serverAuthToken) {
+			this.userId = userId;
 			this.name = name;
 			this.email = email;
 			this.picture = picture;
@@ -20,7 +22,7 @@ export const useUserStore = defineStore("user", {
 			// Save to localStorage
 			localStorage.setItem(
 				"user",
-				JSON.stringify({ name, email, picture, serverAuthToken }),
+				JSON.stringify({ userId, name, email, picture, serverAuthToken }),
 			);
 		},
 
@@ -31,6 +33,7 @@ export const useUserStore = defineStore("user", {
 			}
 			const storedUser = JSON.parse(localStorage.getItem("user"));
 			if (storedUser) {
+				this.userId = storedUser.userId;
 				this.name = storedUser.name;
 				this.email = storedUser.email;
 				this.picture = storedUser.picture;
@@ -41,6 +44,7 @@ export const useUserStore = defineStore("user", {
 
 		// Clear user info on logout
 		logout() {
+			this.userId = "";
 			this.name = "";
 			this.email = "";
 			this.picture = "";

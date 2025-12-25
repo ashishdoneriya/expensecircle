@@ -3,7 +3,6 @@ package com.csetutorials.expensecircle.controllers;
 import com.csetutorials.expensecircle.annotations.GroupMemberOnly;
 import com.csetutorials.expensecircle.beans.AddExpenseRequest;
 import com.csetutorials.expensecircle.beans.UpdateExpenseRequest;
-import com.csetutorials.expensecircle.beans.UserInfo;
 import com.csetutorials.expensecircle.dto.ExpenseResponseDto;
 import com.csetutorials.expensecircle.projection.ExpenseProjection;
 import com.csetutorials.expensecircle.services.AsyncCalls;
@@ -33,47 +32,44 @@ public class ExpenseController {
 
 	@GetMapping
 	public List<ExpenseProjection> listExpenses(
-		@PathVariable("groupId") long groupId,
+		@PathVariable("groupId") String groupId,
 		@RequestParam("year") short year,
 		@RequestParam("month") byte month,
 		@RequestParam("dayOfMonth") byte dayOfMonth,
-		@RequestParam(name = "categoryId", required = false, defaultValue = "") String sCategoryId) {
-		if (sCategoryId.trim().isEmpty()) {
+		@RequestParam(name = "categoryId", required = false, defaultValue = "") String categoryId) {
+		if (categoryId.trim().isEmpty()) {
 			return expenseService.listExpenses(groupId, year, month, dayOfMonth);
 		}
-		return expenseService.listExpenses(groupId, Long.parseLong(sCategoryId), year, month, dayOfMonth);
+		return expenseService.listExpenses(groupId, categoryId, year, month, dayOfMonth);
 	}
 
 	@PostMapping
 	public void createExpense(
-		@PathVariable("groupId") long groupId,
+		@PathVariable("groupId") String groupId,
 		@RequestBody AddExpenseRequest form) {
-		UserInfo userInfo = loggedInUserInfoService.getInfo();
-		expenseCoordinator.addExpense(groupId, form, userInfo.getEmail());
+		expenseCoordinator.addExpense(groupId, form, loggedInUserInfoService.getId());
 	}
 
 	@GetMapping("/{expenseId}")
 	public ExpenseResponseDto getExpense(
-		@PathVariable("groupId") long groupId,
-		@PathVariable("expenseId") long expenseId) {
+		@PathVariable("groupId") String groupId,
+		@PathVariable("expenseId") String expenseId) {
 		return expenseCoordinator.findByGroupIdAndExpenseId(groupId, expenseId).orElseThrow(() -> new ResponseStatusException(
 				HttpStatus.NOT_FOUND, "Expense not found"));
 	}
 
 	@PutMapping("/{expenseId}")
 	public void updateExpense(
-		@PathVariable("groupId") long groupId,
-		@PathVariable("expenseId") long expenseId,
+		@PathVariable("groupId") String groupId,
+		@PathVariable("expenseId") String expenseId,
 		@RequestBody UpdateExpenseRequest form) {
-
-		UserInfo userInfo = loggedInUserInfoService.getInfo();
-		expenseCoordinator.updateExpense(groupId, userInfo.getEmail(), form);
+		expenseCoordinator.updateExpense(groupId, loggedInUserInfoService.getId(), form);
 	}
 
 	@DeleteMapping("/{expenseId}")
 	public void deleteExpense(
-		@PathVariable("groupId") long groupId,
-		@PathVariable("expenseId") long expenseId) {
+		@PathVariable("groupId") String groupId,
+		@PathVariable("expenseId") String expenseId) {
 		asyncCalls.deleteExpense(groupId, expenseId);
 	}
 

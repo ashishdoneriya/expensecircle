@@ -2,12 +2,14 @@ package com.csetutorials.expensecircle.projection;
 
 public interface ExpenseProjection {
 
-	Long getExpenseId();
+	String getExpenseId();
+
+	long getTimestamp();
 
 	Long getAmount();
 
 	String getDescription();
 
-	Long getCategoryId();
+	String getCategoryId();
 
 }

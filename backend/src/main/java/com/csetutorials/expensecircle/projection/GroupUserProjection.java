@@ -8,7 +8,7 @@ public interface GroupUserProjection {
 
 	String getUserName();
 
-	Long getGroupId();
+	String getGroupId();
 
 	String getGroupName();
 

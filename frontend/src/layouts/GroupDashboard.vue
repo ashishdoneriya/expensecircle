@@ -17,7 +17,7 @@
 	onMounted(() => {
 		const route = useRoute();
 		const group = useGroupStore();
-		if (Number(route.params.groupId) != Number(group.groupId)) {
+		if (route.params.groupId != group.groupId) {
 			group.clearInfo();
 			group.initialize(route.params.groupId);
 		}

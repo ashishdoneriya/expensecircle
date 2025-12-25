@@ -15,7 +15,7 @@ import lombok.*;
 public class Group {
 
 	@Id
-	private Long groupId;
+	private String groupId;
 
 	@Column(length = 200)
 	private String groupName;

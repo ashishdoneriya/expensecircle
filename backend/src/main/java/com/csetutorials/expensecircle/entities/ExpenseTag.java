@@ -18,10 +18,10 @@ import lombok.*;
 public class ExpenseTag {
 
 	@Id
-	private Long groupId;
+	private String groupId;
 	@Id
-	private Long expenseId;
+	private String expenseId;
 	@Id
-	private Long tagId;
+	private String tagId;
 
 }

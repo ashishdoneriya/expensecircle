@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class NewOrder {
 
-	long id;
+	String id;
 	long orderNumber;
 
 }

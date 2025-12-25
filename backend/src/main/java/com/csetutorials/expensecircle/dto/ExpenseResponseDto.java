@@ -3,12 +3,12 @@ package com.csetutorials.expensecircle.dto;
 import java.util.List;
 
 public record ExpenseResponseDto (
-	long expenseId,
+	String expenseId,
 	long timestamp,
-	long categoryId,
+	String categoryId,
 	long amount,
 	String description,
-	List<Long> tags,
+	List<String> tags,
 	String ownerUserId,
 	String lastChangedByUserId
 ) {}

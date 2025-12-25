@@ -14,7 +14,7 @@ import java.io.Serializable;
 public class GroupUserId implements Serializable {
 
 	@Id
-	private Long groupId;
+	private String groupId;
 
 	@Id
 	private String userId;

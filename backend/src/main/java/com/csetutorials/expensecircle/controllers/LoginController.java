@@ -1,9 +1,9 @@
 package com.csetutorials.expensecircle.controllers;
 
 import com.csetutorials.expensecircle.beans.UserInfo;
-import com.csetutorials.expensecircle.services.AsyncCalls;
 import com.csetutorials.expensecircle.services.GoogleTokenVerifier;
 import com.csetutorials.expensecircle.services.JWTService;
+import com.csetutorials.expensecircle.services.UserService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +31,10 @@ public class LoginController {
 	private GoogleTokenVerifier googleTokenVerifier;
 
 	@Autowired
-	private AsyncCalls asyncCalls;
+	private UserService userService;
 
 	@PostMapping("google-id-token")
-	public ResponseEntity<?> verifyToken(@RequestBody Map<String, String> body) {
+	public ResponseEntity<Object> verifyToken(@RequestBody Map<String, String> body) {
 		String idToken = body.get("googleIdToken");
 		GoogleIdToken token;
 
@@ -57,14 +57,14 @@ public class LoginController {
 		String email = token.getPayload().getEmail();
 		String name = (String) token.getPayload().get("name");
 		String picture = (String) token.getPayload().get("picture");
+		String userId = userService.getOrCreateUserId(email, name, picture);
 		// Generate a JWT token for the authenticated user
 		Map<String, Object> response = new HashMap<>();
+		response.put("userId", userId);
 		response.put("name", name);
 		response.put("email", email);
 		response.put("picture", picture);
-		response.put("serverAuthToken", jwtService.serialize(new UserInfo(name, email, picture)));
-
-		asyncCalls.updateUserInfo(email, name, picture);
+		response.put("serverAuthToken", jwtService.serialize(new UserInfo(userId, name, email, picture)));
 
 		// Return the user information and JWT token
 		return ResponseEntity.ok(response);

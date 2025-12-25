@@ -15,9 +15,9 @@ import lombok.*;
 public class Expense {
 
 	@Id
-	private long groupId;
+	private String groupId;
 	@Id
-	private long expenseId;
+	private String expenseId;
 
 	@Column(nullable = false)
 	private long timestamp;
@@ -38,7 +38,7 @@ public class Expense {
 	private String description;
 
 	@Column(nullable = false)
-	private long categoryId;
+	private String categoryId;
 
 	@Column(length = 254)
 	private String ownerUserId;

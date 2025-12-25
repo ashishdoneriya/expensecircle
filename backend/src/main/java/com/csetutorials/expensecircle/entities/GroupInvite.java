@@ -20,9 +20,9 @@ import java.time.Instant;
 public class GroupInvite {
 
 	@Id
-	Long groupId;
+	String groupId;
 	@Id
-	Long inviteId;
+	String inviteId;
 	@Column
 	String invitedUserId;
 	@Column(length = 255)
@@ -33,15 +33,15 @@ public class GroupInvite {
 	@Enumerated(EnumType.STRING)
 	InviteStatus status;
 	@Column(nullable = false, updatable = false)
-	private Instant createdAt;
+	private long createdAt;
 	@Column(nullable = false)
-	private Instant expiresAt;
+	private long expiresAt;
 	@Column(nullable = false)
-	private Instant consumedAt;
+	private long consumedAt;
 
 	@PrePersist
 	void onCreate() {
-		this.createdAt = Instant.now();
+		this.createdAt = Instant.now().toEpochMilli();
 	}
 
 	public boolean isEmailInvite() {

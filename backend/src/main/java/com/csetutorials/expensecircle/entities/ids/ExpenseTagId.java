@@ -13,10 +13,10 @@ import java.io.Serializable;
 public class ExpenseTagId implements Serializable {
 
 	@Id
-	private Long groupId;
+	private String groupId;
 	@Id
-	private Long expenseId;
+	private String expenseId;
 	@Id
-	private Long tagId;
+	private String tagId;
 
 }

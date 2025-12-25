@@ -21,14 +21,16 @@ public class ExpenseService {
 
 	@Autowired
 	private ExpenseRepository repo;
+	@Autowired
+	private IdGenerator idGenerator;
 
-	public void addExpense(long groupId, AddExpenseRequest request, @NonNull String ownerUserId) {
+	public String addExpense(String groupId, AddExpenseRequest request, @NonNull String ownerUserId) {
+		String id = idGenerator.getStringId();
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(request.getTimestamp());
-		long expenseId = calendar.getTimeInMillis();
 		Expense expense = Expense.builder()
 			.groupId(groupId)
-			.expenseId(expenseId)
+			.expenseId(id)
 			.year((short) calendar.get(Calendar.YEAR))
 			.month((byte) (calendar.get(Calendar.MONTH) + 1))
 			.dayOfMonth((byte) calendar.get(Calendar.DAY_OF_MONTH))
@@ -40,18 +42,18 @@ public class ExpenseService {
 			.timestamp(request.getTimestamp())
 			.build();
 		repo.save(expense);
+		return id;
 	} 
 
-	public void updateExpense(long groupId, String email, UpdateExpenseRequest request) {
+	public void updateExpense(String groupId, String email, UpdateExpenseRequest request) {
 	
 		Optional<Expense> expenseOpt = repo.findByGroupIdAndExpenseId(groupId, request.getExpenseId());
 		if (expenseOpt.isEmpty()) {
 			return;
 		}
 		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(request.getExpenseId());
-		Expense expense = expenseOpt.get();
 		calendar.setTimeInMillis(request.getNewTimestamp());
+		Expense expense = expenseOpt.get();
 		expense.setYear((short) calendar.get(Calendar.YEAR));
 		expense.setMonth((byte) (calendar.get(Calendar.MONTH) + 1));
 		expense.setDayOfMonth((byte) calendar.get(Calendar.DAY_OF_MONTH));
@@ -63,15 +65,15 @@ public class ExpenseService {
 		repo.save(expense);
 	}
 
-	public Optional<Expense> findByGroupIdAndExpenseId(long groupId, long expenseId) {
+	public Optional<Expense> findByGroupIdAndExpenseId(String groupId, String expenseId) {
 		return repo.findByGroupIdAndExpenseId(groupId, expenseId);
 	}
 
-	public List<ExpenseProjection> listExpenses(long groupId, short year, byte month, byte dayOfMonth) {
+	public List<ExpenseProjection> listExpenses(String groupId, short year, byte month, byte dayOfMonth) {
 		return repo.findByGroupIdAndYearAndMonthAndDayOfMonth(groupId, year, month, dayOfMonth);
 	}
 
-	public List<ExpenseProjection> listExpenses(long groupId, long categoryId, short year, byte month, byte dayOfMonth) {
+	public List<ExpenseProjection> listExpenses(String groupId, String categoryId, short year, byte month, byte dayOfMonth) {
 		return repo.findByGroupIdAndCategoryIdAndYearAndMonthAndDayOfMonth(groupId, categoryId, year, month, dayOfMonth);
 	}
 

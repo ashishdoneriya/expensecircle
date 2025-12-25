@@ -18,7 +18,7 @@ import lombok.Setter;
 public class GroupUserMembership {
 
 	@Id
-	private Long groupId;
+	private String groupId;
 
 	@Id
 	private String userId;

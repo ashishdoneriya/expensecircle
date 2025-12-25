@@ -16,33 +16,33 @@ import java.util.Optional;
 public interface GroupUserMembershipRepository extends JpaRepository<GroupUserMembership, GroupUserId> {
 
 	@Query("select u.userId as userId, u.name as userName, gu.role as role from User u JOIN GroupUserMembership gu on u.userId = gu.userId and gu.groupId = :groupId")
-	List<GroupUserProjection> findByGroupId(@Param("groupId") Long groupId);
+	List<GroupUserProjection> findByGroupId(@Param("groupId") String groupId);
 
 	@Query("select g.groupId as groupId, g.groupName as groupName, gu.role as role from Group g JOIN GroupUserMembership gu on g.groupId = gu.groupId and gu.userId = :userId")
 	List<GroupUserProjection> findByUserId(@Param("userId") String userId);
 
 	@Query("select g.groupId as groupId, g.groupName as groupName, gu.role as role from Group g JOIN GroupUserMembership gu on g.groupId = gu.groupId and gu.userId = :userId")
 	Optional<GroupUserProjection> findByGroupIdAndUserId(
-		@Param("groupId") Long groupId, @Param("userId") String userId);
+		@Param("groupId") String groupId, @Param("userId") String userId);
 
 	@Query("select gu.role from GroupUserMembership gu where gu.groupId = :groupId and gu.userId = :userId")
 	Optional<Role> findRoleByGroupIdAndUserId(
-		@Param("groupId") Long groupId, @Param("userId") String userId);
+		@Param("groupId") String groupId, @Param("userId") String userId);
 
 	@Modifying
 	@Transactional
 	@Query("UPDATE GroupUserMembership gu SET gu.role = 'ADMIN' WHERE gu.id.groupId = :groupId")
-	void makeAllMembersAdmin(@Param("groupId") Long groupId);
+	void makeAllMembersAdmin(@Param("groupId") String groupId);
 
 	@Modifying
 	@Transactional
 	@Query("UPDATE GroupUserMembership gu SET gu.role = :newRole WHERE gu.id.userId = :userId AND gu.id.groupId = :groupId")
-	void updateMemberRole(@Param("groupId") Long groupId,
+	void updateMemberRole(@Param("groupId") String groupId,
 						 @Param("userId") String userId,
 						 @Param("newRole") Role role);
 
 	@Modifying
 	@Transactional
 	@Query("DELETE from GroupUserMembership gu WHERE gu.id.groupId = :groupId")
-    void deleteByGroupId(@Param("groupId") long groupId);
+    void deleteByGroupId(@Param("groupId") String groupId);
 }

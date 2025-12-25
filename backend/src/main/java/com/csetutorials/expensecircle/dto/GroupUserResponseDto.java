@@ -13,7 +13,7 @@ import lombok.Setter;
 public class GroupUserResponseDto {
 	private String userId;
 	private String userName;
-	private Long groupId;
+	private String groupId;
 	private String groupName;
 	private Role role;
 

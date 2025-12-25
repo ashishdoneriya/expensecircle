@@ -22,39 +22,42 @@ public class GroupTagService {
 	private GroupTagRepository repo;
 	@Autowired
 	private DataSource dataSource;
+	@Autowired
+	private IdGenerator idGenerator;
 
 	private static final String ORDER_CHANGE_QUERY =
 		"UPDATE groupTags SET orderNumber = ? WHERE tagId = ? and groupId = ?";
 
-	public List<GroupTag> getTags(long groupId) {
+	public List<GroupTag> getTags(String groupId) {
 		return repo.findAllByGroupId(groupId);
 	}
 
-	public void addTag(long groupId, long tagId, String tagName) {
-		repo.save(new GroupTag(groupId, tagId, tagName, tagId));
+	public String addTag(String groupId, String tagName) {
+		String id = idGenerator.getStringId();
+		repo.save(new GroupTag(groupId, id, tagName, idGenerator.getId()));
+		return id;
 	}
 
-	public List<GroupTag> addTags(long groupId, Collection<String> tagNames) {
-		long currentTimeMillis = System.currentTimeMillis();
+	public List<GroupTag> addTags(String groupId, Collection<String> tagNames) {
 		List<GroupTag> list = new ArrayList<>();
 		for (String tagName: tagNames) {
-			list.add(new GroupTag(groupId, currentTimeMillis, tagName, currentTimeMillis++));
+			list.add(new GroupTag(groupId, idGenerator.getStringId(), tagName, idGenerator.getId()));
 		}
 		repo.saveAll(list);
 		return list;
 	}
 
-	public void renameTag(long groupId, long tagId, String newTagName) {
+	public void renameTag(String groupId, String tagId, String newTagName) {
 		repo.renameTag(groupId, tagId, newTagName);
 	}
 
-	public void changeTagsOrder(long groupId, List<NewOrder> list) {
+	public void changeTagsOrder(String groupId, List<NewOrder> list) {
 		try (Connection connection = dataSource.getConnection();
 			 PreparedStatement ps = connection.prepareStatement(ORDER_CHANGE_QUERY)) {
 			for (NewOrder order : list) {
 				ps.setLong(1, order.getOrderNumber());
-				ps.setLong(2, order.getId());
-				ps.setLong(3, groupId);
+				ps.setString(2, order.getId());
+				ps.setString(3, groupId);
 				ps.addBatch();
 			}
 			ps.executeBatch();
@@ -63,7 +66,7 @@ public class GroupTagService {
 		}
 	}
 
-	public void verifyTags(long groupId, Set<Long> tags) {
-		tags.retainAll(getTags(groupId).stream().map(obj -> obj.getTagId()).toList());
+	public void verifyTags(String groupId, Set<String> tags) {
+		tags.retainAll(getTags(groupId).stream().map(GroupTag::getTagId).toList());
 	}
 }

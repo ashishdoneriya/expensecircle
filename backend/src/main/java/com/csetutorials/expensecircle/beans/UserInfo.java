@@ -11,6 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserInfo {
 
+	private String userId;
+
 	private String name;
 
 	private String email;
