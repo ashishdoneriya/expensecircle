@@ -20,15 +20,21 @@
 	</el-row>
 	<el-row justify="center">
 		<el-col :xs="24" :sm="22" :md="15" :lg="12" :xl="9">
-			<draggable :list="group.categories" @end="onDragEnd" handle=".handle" :item-key="'categoryId'">
+			<draggable
+				:list="group.categories"
+				@end="onDragEnd"
+				handle=".handle"
+				:item-key="'categoryId'">
 				<template #item="{ element }">
-					<el-row
-						:key="element.categoryId"
-						justify="center">
+					<el-row :key="element.categoryId" justify="center">
 						<el-col :span="24">
 							<el-row class="flex-container">
 								<div class="flex-container">
-									<img src="@/assets/justify.svg" alt="Icon" class="icon handle cursorPointer" style="margin-right:5px"/>
+									<img
+										src="@/assets/justify.svg"
+										alt="Icon"
+										class="icon handle cursorPointer"
+										style="margin-right: 5px" />
 									<el-text
 										style="
 											font-size: var(--el-font-size-large);
@@ -55,9 +61,7 @@
 							</el-row>
 						</el-col>
 						<el-col :span="24">
-							<el-divider
-								border-style="dashed"
-								style="margin: 5px 0px" />
+							<el-divider border-style="dashed" style="margin: 5px 0px" />
 						</el-col>
 					</el-row>
 				</template>
@@ -96,8 +100,8 @@
 		let newArr = [];
 		for (let i = 0; i < group.categories.length; i++) {
 			newArr.push({
-				'id' : group.categories[i].categoryId,
-				'orderNumber': i,
+				id: group.categories[i].categoryId,
+				orderNumber: i,
 			});
 		}
 		api.changeCategoriesOrder(group.groupId, newArr);

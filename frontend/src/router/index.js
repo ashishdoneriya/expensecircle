@@ -17,7 +17,9 @@ import Tags from "@/layouts/Tags.vue";
 import NewExpense from "@/layouts/NewExpense.vue";
 import Stats from "@/layouts/Stats.vue";
 import EditExpense from "@/layouts/EditExpense.vue";
-import GroupSettings from "@/layouts/GroupSettings.vue";
+import GroupSettingsLayout from "@/layouts/GroupSettingsLayout.vue";
+import GroupSettingsMenu from "@/layouts/GroupSettingsMenu.vue";
+import Members from "@/layouts/Members.vue";
 
 const router = createRouter({
 	history: createWebHistory(import.meta.env.BASE_URL),
@@ -45,16 +47,6 @@ const router = createRouter({
 					component: Expenses,
 				},
 				{
-					path: "categories",
-					name: "Categories",
-					component: Categories,
-				},
-				{
-					path: "tags",
-					name: "Tags",
-					component: Tags,
-				},
-				{
 					path: "expense",
 					name: "NewExpense",
 					component: NewExpense,
@@ -72,8 +64,30 @@ const router = createRouter({
 				{
 					path: "settings",
 					name: "GroupSettings",
-					component: GroupSettings
-				}
+					component: GroupSettingsLayout,
+					children: [
+						{
+							path: "",
+							name: "GroupSettingsMenu",
+							component: GroupSettingsMenu,
+						},
+						{
+							path: "members",
+							name: "Members",
+							component: Members,
+						},
+						{
+							path: "categories",
+							name: "Categories",
+							component: Categories,
+						},
+						{
+							path: "tags",
+							name: "Tags",
+							component: Tags,
+						},
+					],
+				},
 			],
 		},
 	]),
@@ -96,18 +110,13 @@ router.beforeEach((to, from, next) => {
 
 // Workaround for https://github.com/vitejs/vite/issues/11804
 router.onError((err, to) => {
-	if (
-		err?.message?.includes?.("Failed to fetch dynamically imported module")
-	) {
+	if (err?.message?.includes?.("Failed to fetch dynamically imported module")) {
 		if (!localStorage.getItem("vuetify:dynamic-reload")) {
 			console.log("Reloading page to fix dynamic import error");
 			localStorage.setItem("vuetify:dynamic-reload", "true");
 			location.assign(to.fullPath);
 		} else {
-			console.error(
-				"Dynamic import error, reloading page did not fix it",
-				err,
-			);
+			console.error("Dynamic import error, reloading page did not fix it", err);
 		}
 	} else {
 		console.error(err);

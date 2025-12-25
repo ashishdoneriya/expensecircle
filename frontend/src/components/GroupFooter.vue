@@ -22,26 +22,6 @@
 
 		<div
 			class="bottom-bar-item"
-			@click="navigateTo('categories')"
-			:class="{ active: activePage === 'categories' }">
-			<el-icon class="icon">
-				<Collection />
-			</el-icon>
-			<span class="label">Categories</span>
-		</div>
-
-		<div
-			class="bottom-bar-item"
-			@click="navigateTo('tags')"
-			:class="{ active: activePage === 'tags' }">
-			<el-icon class="icon">
-				<PriceTag />
-			</el-icon>
-			<span class="label">Tags</span>
-		</div>
-
-		<div
-			class="bottom-bar-item"
 			@click="navigateTo('settings')"
 			:class="{ active: activePage === 'settings' }">
 			<el-icon class="icon">

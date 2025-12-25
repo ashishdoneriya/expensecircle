@@ -92,7 +92,7 @@
 					table-layout="auto"
 					v-loading="disableAll"
 					:default-sort="{ prop: 'amount', order: 'descending' }">
-					<el-table-column label="Category" sortable align="left">
+					<el-table-column label="Category" align="left">
 						<template #default="scope">
 							<el-tag
 								v-if="scope.row.categoryId != 0"
@@ -103,7 +103,7 @@
 							</el-tag>
 						</template>
 					</el-table-column>
-					<el-table-column prop="amount" label="Amount" align="right">
+					<el-table-column prop="amount" sortable label="Amount" align="right">
 						<template #default="scope">
 							<span>&#8377;&nbsp;{{ scope.row.amount }}</span>
 						</template>
@@ -132,14 +132,14 @@
 					table-layout="auto"
 					v-loading="disableAll"
 					:default-sort="{ prop: 'amount', order: 'descending' }">
-					<el-table-column label="Tag" sortable align="left">
+					<el-table-column label="Tag" align="left">
 						<template #default="scope">
 							<el-tag type="primary">
 								{{ group.tagsMap[scope.row.tagId] }}
 							</el-tag>
 						</template>
 					</el-table-column>
-					<el-table-column prop="amount" label="Amount" align="right">
+					<el-table-column prop="amount" sortable label="Amount" align="right">
 						<template #default="scope">
 							<span>&#8377;&nbsp;{{ scope.row.amount }}</span>
 						</template>
@@ -166,15 +166,15 @@
 					:data="breakdownByMonth"
 					table-layout="auto"
 					v-loading="disableAll"
-					:default-sort="{ prop: 'amount', order: 'descending' }">
-					<el-table-column label="Month" sortable align="left">
+					:default-sort="{ prop: 'month', order: 'ascending' }">
+					<el-table-column label="Month" prop="month" sortable align="left">
 						<template #default="scope">
 							<el-tag v-if="scope.row.categoryId != 0" type="primary">
 								{{ monthsName[scope.row.month - 1] }}
 							</el-tag>
 						</template>
 					</el-table-column>
-					<el-table-column prop="amount" label="Amount" align="right">
+					<el-table-column prop="amount" label="Amount" sortable align="right">
 						<template #default="scope">
 							<span>&#8377;&nbsp;{{ scope.row.amount }}</span>
 						</template>
@@ -408,10 +408,7 @@
 </script>
 
 <style scoped>
-	.flex-container {
-		display: flex;
-		align-items: center;
-	}
+
 	.hidden-date-picker {
 		visibility: hidden;
 		width: 1px;
