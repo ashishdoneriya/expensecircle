@@ -30,27 +30,27 @@ public class DeleteService {
 	private ExpenseRepository expenseRepository;
 
 	public void deleteGroup(long groupId) {
-		groupRepository.deleteByGroupId(groupId);
+		expenseTagRepository.deleteByGroupId(groupId);
+		expenseRepository.deleteByGroupId(groupId);
 		groupCategoryRepository.deleteByGroupId(groupId);
 		groupTagRepository.deleteByGroupId(groupId);
 		groupUserMembershipRepository.deleteByGroupId(groupId);
-		expenseTagRepository.deleteByGroupId(groupId);
-		expenseRepository.deleteByGroupId(groupId);
+		groupRepository.deleteByGroupId(groupId);
 	}
 
 	public void deleteCategory(long groupId, long categoryId) {
-		groupCategoryRepository.deleteByCategoryId(groupId, categoryId);
 		expenseRepository.deleteByCategoryId(groupId, categoryId);
+		groupCategoryRepository.deleteByCategoryId(groupId, categoryId);
 	}
 
 	public void deleteTag(long groupId, long tagId) {
-		groupTagRepository.deleteByGroupIdAndTagId(groupId, tagId);
 		expenseTagRepository.deleteByGroupIdAndTagId(groupId, tagId);
+		groupTagRepository.deleteByGroupIdAndTagId(groupId, tagId);
 	}
 
 	public void deleteExpense(long groupId, long expenseId) {
-		expenseRepository.deleteByGroupIdAndExpenseId(groupId, expenseId);
 		expenseTagRepository.deleteByGroupIdAndExpenseId(groupId, expenseId);
+		expenseRepository.deleteByGroupIdAndExpenseId(groupId, expenseId);
 	}
 
 }

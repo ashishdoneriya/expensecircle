@@ -5,6 +5,7 @@ import com.csetutorials.expensecircle.beans.UpdateExpenseRequest;
 import com.csetutorials.expensecircle.dto.ExpenseResponseDto;
 import com.csetutorials.expensecircle.entities.Expense;
 
+import com.csetutorials.expensecircle.entities.GroupTag;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,9 @@ public class ExpenseCoordinator {
 	@Autowired
 	private ExpenseTagService expenseTagService;
 
+	@Autowired
+	private IdGenerator idGenerator;
+
 	public void addExpense(long groupId, AddExpenseRequest request, @NonNull String ownerUserId) {
 		
 		expenseService.addExpense(groupId, request, ownerUserId);
@@ -31,7 +35,7 @@ public class ExpenseCoordinator {
 			request.setTags(Collections.emptySet());
 		}
 		groupTagService.verifyTags(groupId, request.getTags());
-		List<Long> newTags = groupTagService.addTags(groupId, request.getNewTags()).stream().map(obj -> obj.getTagId()).toList();
+		List<Long> newTags = groupTagService.addTags(groupId, request.getNewTags()).stream().map(GroupTag::getTagId).toList();
 		List<Long> finalTagsList = new ArrayList<>();
 		finalTagsList.addAll(request.getTags());
 		finalTagsList.addAll(newTags);

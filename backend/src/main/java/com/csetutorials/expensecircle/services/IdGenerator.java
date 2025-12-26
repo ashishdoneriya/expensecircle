@@ -5,10 +5,17 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * Snowflake based id generator
+ */
 @Service
 public class IdGenerator {
 
-	private static final long EPOCH = 1766693577581L;
+	/**
+	 * Date and time (GMT): Wednesday, January 1, 2025 12:00:00 AM
+	 */
+	private static final long EPOCH = 1735689600000L;
+
 	private static final int NODE_BITS = 10;
 	private static final int SEQ_BITS = 12;
 	private static final long MAX_SEQ = (1L << SEQ_BITS) - 1;
