@@ -450,7 +450,7 @@
 
 	function addExpense() {
 		router.push({
-			path: `/groups/${group.groupId}/expense`,
+			path: `/groups/${group.groupId}/new-expense`,
 			query: { timestamp: datePickerDate.value.getTime() },
 		});
 	}

@@ -126,6 +126,10 @@ export function getExpense(groupId, expenseId) {
 	return apiClient.get(`/groups/${groupId}/expenses/${expenseId}`);
 }
 
+export function getExpenseAuditDetails(groupId, expenseId) {
+	return apiClient.get(`/groups/${groupId}/expenses/${expenseId}/audit-details`);
+}
+
 export function getExpenses(groupId, year, month, dayOfMonth, categoryId) {
 	if (!categoryId) {
 		categoryId = '';

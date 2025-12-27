@@ -93,10 +93,6 @@
 		margin-left: 5px;
 	}
 
-	.marginRight10 {
-		margin-right: 10px;
-	}
-
 	.menu-card {
 		margin-top: 10px;
 	}

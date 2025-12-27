@@ -1,4 +1,4 @@
-package com.csetutorials.expensecircle.beans;
+package com.csetutorials.expensecircle.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

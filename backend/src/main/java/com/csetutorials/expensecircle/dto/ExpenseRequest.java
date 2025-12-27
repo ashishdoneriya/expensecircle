@@ -1,13 +1,13 @@
-package com.csetutorials.expensecircle.beans;
+package com.csetutorials.expensecircle.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
-public class AddExpenseRequest {
+public class ExpenseRequest {
 
 	private long timestamp;
 
@@ -17,8 +17,6 @@ public class AddExpenseRequest {
 
 	private String categoryId;
 
-	private Set<String> tags; // ids
-
-	private Set<String> newTags;
+	private List<ExpenseTagDto> tags; // ids
 
 }

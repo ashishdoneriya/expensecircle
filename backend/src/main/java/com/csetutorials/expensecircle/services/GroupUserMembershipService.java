@@ -7,6 +7,7 @@ import com.csetutorials.expensecircle.entities.ids.GroupUserId;
 import com.csetutorials.expensecircle.projection.GroupUserProjection;
 import com.csetutorials.expensecircle.repositories.GroupUserMembershipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,6 +37,16 @@ public class GroupUserMembershipService {
 
 	public void addMember(String groupId, String email, Role role) {
 
+		GroupUserMembership membership = new GroupUserMembership();
+		membership.setUserId(email);
+		membership.setGroupId(groupId);
+		membership.setRole(role);
+		repo.save(membership);
+
+	}
+
+	@Async
+	public void sendInvite(String groupId, String email, Role role, String inviterUserId) {
 		GroupUserMembership membership = new GroupUserMembership();
 		membership.setUserId(email);
 		membership.setGroupId(groupId);

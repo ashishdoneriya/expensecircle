@@ -2,10 +2,7 @@ package com.csetutorials.expensecircle.entities;
 
 import com.csetutorials.expensecircle.entities.ids.GroupTagId;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,6 +11,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "groupTags")
 @IdClass(GroupTagId.class)
+@Builder
 public class GroupTag {
 
 	@Id

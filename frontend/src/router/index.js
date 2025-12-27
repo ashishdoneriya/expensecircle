@@ -43,16 +43,17 @@ const router = createRouter({
 			children: [
 				{
 					path: "expenses",
+					alias: [""],
 					name: "Expenses",
 					component: Expenses,
 				},
 				{
-					path: "expense",
+					path: "new-expense",
 					name: "NewExpense",
 					component: NewExpense,
 				},
 				{
-					path: "expense/:expenseId",
+					path: "edit-expense/:expenseId",
 					name: "EditExpense",
 					component: EditExpense,
 				},

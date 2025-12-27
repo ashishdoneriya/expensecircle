@@ -56,41 +56,7 @@
 				</el-form-item>
 
 				<el-form-item label="Tags">
-					<el-select
-						v-model="form.tags"
-						placeholder="Select Tags"
-						multiple
-						filterable
-						allow-create
-						default-first-option
-						:reserve-keyword="false">
-						<el-option
-							v-for="tag in group.tags"
-							:label="tag.tagName"
-							:value="tag.tagId" />
-					</el-select>
-				</el-form-item>
-
-				<el-form-item
-					label="Created"
-					v-if="
-						!(
-							expense.ownerUserId == expense.lastChangedByUserId &&
-							expense.ownerUserId == userStore.userId
-						)
-					">
-					<el-text>{{ expense.ownerUserId }}</el-text>
-				</el-form-item>
-
-				<el-form-item
-					label="Last Edit"
-					v-if="
-						!(
-							expense.ownerUserId == expense.lastChangedByUserId &&
-							expense.ownerUserId == userStore.userId
-						)
-					">
-					<el-text>{{ expense.lastChangedByUserId }}</el-text>
+					<Tags v-model="form.tags" />
 				</el-form-item>
 
 				<el-form-item :label="isMobile ? '' : ' '">
@@ -105,7 +71,36 @@
 					</el-button>
 					<el-button @click="goBack">Cancel</el-button>
 				</el-form-item>
+
+				<el-form-item
+					:label="isMobile ? '' : ' '"
+					style="margin-top: 30px"
+					v-if="auditState != 'loaded'">
+					<div @click="loadAuditDetails()" class="flex-container cursorPointer">
+						<Image name="history" v-if="auditState == 'notRequested'" />
+						<el-icon class="is-loading marginRight10" style v-else>
+							<Loading />
+						</el-icon>
+						View Activity
+					</div>
+				</el-form-item>
 			</el-form>
+		</el-col>
+	</el-row>
+	<el-row justify="center" v-if="auditState == 'loaded'">
+		<el-col :xs="24" :sm="22" :md="15" :lg="12" :xl="9">
+			<el-descriptions
+				title="Activity History"
+				:column="1"
+				:size="isMobile ? 'small' : 'default'"
+				border>
+				<el-descriptions-item label="Created by">
+					{{ auditDetails.createdBy }}
+				</el-descriptions-item>
+				<el-descriptions-item label="Updated by" v-if="auditDetails.updatedBy">
+					{{ auditDetails.updatedBy }}
+				</el-descriptions-item>
+			</el-descriptions>
 		</el-col>
 	</el-row>
 </template>
@@ -116,10 +111,11 @@
 	import { ElMessage, ElMessageBox } from "element-plus";
 	import { useGroupStore } from "@/stores/group";
 	import * as api from "@/api/api";
-	import { Plus } from "@element-plus/icons-vue";
+	import { Plus, Loading } from "@element-plus/icons-vue";
 	import { useUserStore } from "@/stores/user";
 	import { Delete } from "@element-plus/icons-vue";
-
+	import Tags from "@/components/Tags.vue";
+	import Image from "@/components/Image.vue";
 	const userStore = useUserStore();
 
 	const group = useGroupStore();
@@ -138,12 +134,20 @@
 
 	const formRef = ref(null);
 
+	// three states - notLoaded, loading, loaded
+	const auditState = ref("notRequested");
+
 	// Validation rules
 	const rules = {
 		amount: [
 			{ required: true, message: "Amount is required", trigger: "blur" },
 		],
 	};
+
+	const auditDetails = ref({
+		createdBy: "",
+		updatedBy: "",
+	});
 
 	onMounted(async () => {
 		let expenseId = route.params.expenseId;
@@ -157,7 +161,10 @@
 			form.categoryId = expense.value.categoryId;
 			form.amount = expense.value.amount;
 			form.description = expense.value.description;
-			form.tags = expense.value.tags;
+			form.tags = expense.value.tags.map((tagId) => ({
+				tagId,
+				tagName: group.tagsMap[tagId],
+			}));
 		}
 	});
 
@@ -174,29 +181,16 @@
 		} catch (error) {}
 	}
 
-	function isActuallyBase64(str) {
-		try {
-			// Step 1: Structural check
-			if (!/^[A-Za-z0-9+/]*={0,2}$/.test(str)) return false;
-
-			// Step 2: Attempt decoding
-			return btoa(atob(str)) === str;
-		} catch (err) {
-			return false;
-		}
-	}
-
 	function onSubmit() {
 		formRef.value.validate((valid) => {
 			if (valid) {
 				let obj = {
 					expenseId: expense.value.expenseId,
-					newTimestamp: Number(form.timestamp),
+					timestamp: Number(form.timestamp),
 					amount: form.amount,
 					categoryId: form.categoryId,
 					description: form.description,
-					tags: form.tags.filter((item) => isActuallyBase64(item)),
-					newTags: form.tags.filter((item) => !isActuallyBase64(item)),
+					tags: form.tags,
 				};
 
 				api
@@ -222,6 +216,49 @@
 				return false;
 			}
 		});
+	}
+
+	async function loadAuditDetails() {
+		auditState.value = "loading";
+		try {
+			let data = (
+				await api.getExpenseAuditDetails(group.groupId, expense.value.expenseId)
+			).data;
+			if (!data.createdByName && !data.createdByName) {
+				ElMessage({
+					message: "Activity History not available",
+					type: "error",
+					offset: window.innerHeight - 100,
+				});
+				auditState.value = "";
+				return;
+			}
+			auditDetails.value.createdBy = `${data.createdByName} (${data.createdByEmail}) on ${epochToString(data.createdAt)}`;
+			if (data.updatedByName) {
+				auditDetails.value.updatedBy = `${data.updatedByName} (${data.updatedByEmail}) on ${epochToString(data.updatedAt)}`;
+			}
+
+			auditState.value = "loaded";
+		} catch (error) {
+			console.log(error);
+			ElMessage({
+					message: "Activity History not available",
+					type: "error",
+					offset: window.innerHeight - 100,
+				});
+			auditState.value = "";
+		}
+	}
+
+	function epochToString(epoch) {
+		return new Intl.DateTimeFormat("en-IN", {
+			day: "2-digit",
+			month: "short",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+			hour12: true,
+		}).format(new Date(Number(epoch)));
 	}
 
 	function goBack() {

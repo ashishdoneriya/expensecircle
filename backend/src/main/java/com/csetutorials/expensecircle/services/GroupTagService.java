@@ -1,8 +1,11 @@
 package com.csetutorials.expensecircle.services;
 
 import com.csetutorials.expensecircle.beans.NewOrder;
+import com.csetutorials.expensecircle.dto.ExpenseTagDto;
 import com.csetutorials.expensecircle.entities.GroupTag;
 import com.csetutorials.expensecircle.repositories.GroupTagRepository;
+import com.csetutorials.expensecircle.utilities.StringUtils;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,10 +13,9 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class GroupTagService {
@@ -66,7 +68,61 @@ public class GroupTagService {
 		}
 	}
 
-	public void verifyTags(String groupId, Set<String> tags) {
-		tags.retainAll(getTags(groupId).stream().map(GroupTag::getTagId).toList());
+	public Set<String> getTagIdsSet(String groupId) {
+		return getTags(groupId).stream().map(GroupTag::getTagId).collect(Collectors.toSet());
+	}
+
+	@Transactional
+	public List<String> resolveTagIds(String groupId, List<ExpenseTagDto> requestTags) {
+		if (requestTags == null || requestTags.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		// 1. Fetch all existing tags for this group to validate incoming IDs
+		List<GroupTag> existingGroupTags = repo.findAllByGroupId(groupId);
+		Set<String> validTagIds = existingGroupTags.stream()
+			.map(GroupTag::getTagId)
+			.collect(Collectors.toSet());
+
+		// 2. Separate valid IDs from the request
+		List<String> providedValidIds = requestTags.stream()
+			.map(ExpenseTagDto::getTagId)
+			.filter(id -> StringUtils.isNotBlank(id) && validTagIds.contains(id))
+			.toList();
+
+		// 3. Extract names for tags that have no ID (New Tags)
+		// We filter out names that already exist in this group to avoid duplicates
+		Set<String> existingNames = existingGroupTags.stream()
+			.map(t -> t.getTagName().toLowerCase())
+			.collect(Collectors.toSet());
+
+		List<String> namesToCreate = requestTags.stream()
+			.filter(t -> StringUtils.isBlank(t.getTagId()) && StringUtils.isNotBlank(t.getTagName()))
+			.map(ExpenseTagDto::getTagName)
+			.filter(name -> !existingNames.contains(name.toLowerCase()))
+			.distinct()
+			.toList();
+
+		// 4. Create new tags and get their IDs
+		List<GroupTag> newlyCreatedTags = addTags(groupId, namesToCreate);
+		List<String> newIds = newlyCreatedTags.stream().map(GroupTag::getTagId).toList();
+
+		// 5. Combine and return
+		return Stream.concat(providedValidIds.stream(), newIds.stream()).toList();
+	}
+
+	// This method handles the actual DB insertion of new GroupTag entities
+	public List<GroupTag> addTags(String groupId, List<String> names) {
+		if (names.isEmpty()) return Collections.emptyList();
+
+		List<GroupTag> toSave = names.stream()
+			.map(name -> GroupTag.builder()
+				.groupId(groupId)
+				.tagId(idGenerator.getStringId())
+				.tagName(name)
+				.orderNumber(idGenerator.getId())
+				.build())
+			.toList();
+		return repo.saveAll(toSave);
 	}
 }

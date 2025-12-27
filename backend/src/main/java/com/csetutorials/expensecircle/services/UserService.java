@@ -31,5 +31,9 @@ public class UserService {
 		return id;
 	}
 
+	public Optional<User> get(String userId) {
+		return repo.findById(userId);
+	}
+
 
 }

@@ -12,7 +12,7 @@ import lombok.*;
 @Entity
 @Table(name = "expenses")
 @IdClass(ExpenseIdWrapper.class)
-public class Expense {
+public class Expense extends Auditable {
 
 	@Id
 	private String groupId;
@@ -39,12 +39,6 @@ public class Expense {
 
 	@Column(nullable = false)
 	private String categoryId;
-
-	@Column(length = 254)
-	private String ownerUserId;
-
-	@Column(length = 254)
-	private String lastChangedByUserId;
 
 	// Tags are handled separately
 
