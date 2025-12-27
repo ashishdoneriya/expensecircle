@@ -126,6 +126,10 @@ export function getExpense(groupId, expenseId) {
 	return apiClient.get(`/groups/${groupId}/expenses/${expenseId}`);
 }
 
+export function getExpenseAuditDetails(groupId, expenseId) {
+	return apiClient.get(`/groups/${groupId}/expenses/${expenseId}/audit-details`);
+}
+
 export function getExpenses(groupId, year, month, dayOfMonth, categoryId) {
 	if (!categoryId) {
 		categoryId = '';
@@ -231,4 +235,31 @@ export function changeUserPermission(groupId, userId, role) {
 
 export function exitFromGroup(groupId) {
 	return apiClient.post(`/groups/${groupId}/exit`);
+}
+
+export function addRecurringExpense(groupId, obj) {
+	return apiClient.post(`/groups/${groupId}/recurring-expenses`, obj);
+}
+
+export function updateRecurringExpense(groupId, recurringId, obj) {
+	return apiClient.put(`/groups/${groupId}/recurring-expenses/${recurringId}`, obj);
+}
+
+export function getRecurringExpense(groupId, recurringId) {
+	return apiClient.get(`/groups/${groupId}/recurring-expenses/${recurringId}`);
+}
+
+export function deleteRecurringExpense(groupId, recurringId) {
+	return apiClient.delete(`/groups/${groupId}/recurring-expenses/${recurringId}`);
+}
+
+export function listRecurringExpense(groupId, recurringId) {
+	return apiClient.delete(`/groups/${groupId}/recurring-expenses/${recurringId}`);
+}
+export function getAllRecurringExpenses(groupId) {
+	return apiClient.get(`/groups/${groupId}/recurring-expenses`);
+}
+
+export function getRecurringExpenseAuditDetails(groupId, recurringId) {
+	return apiClient.get(`/groups/${groupId}/recurring-expenses/${recurringId}/audit-details`);
 }

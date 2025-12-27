@@ -21,5 +21,7 @@
 		display: flex;
 		justify-content: space-between;
 	}
-
+	.marginRight10 {
+		margin-right: 10px;
+	}
 </style>

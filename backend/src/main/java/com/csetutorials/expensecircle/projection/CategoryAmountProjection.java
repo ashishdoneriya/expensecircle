@@ -1,7 +1,6 @@
 package com.csetutorials.expensecircle.projection;
 
-public interface CategoryAmountProjection {
-	String getCategoryId();
-
-	long getAmount();
-}
+public record CategoryAmountProjection (
+	String categoryId,
+	long amount
+){}

@@ -87,14 +87,14 @@ public interface ExpenseRepository extends JpaRepository<Expense, ExpenseIdWrapp
 		@Param("month") byte month, @Param("dayOfMonth") byte dayOfMonth,
 		@Param("categoryId") String categoryId);
 
-	@Query(value = "SELECT et.tagId as tagId, SUM(e.amount) as amount FROM Expense e " +
+	@Query("SELECT et.tagId as tagId, SUM(e.amount) as amount FROM Expense e " +
 		"JOIN ExpenseTag et on et.groupId = e.groupId and et.expenseId = e.expenseId " +
 		"and e.groupId = :groupId and e.groupId = :groupId and e.year = :year group by tagId")
 	List<TagAmountProjection> getYearlyBreakdownByTag(
 		@Param("groupId") String groupId,
 		@Param("year") short year);
 
-	@Query(value = "SELECT et.tagId as tagId, SUM(e.amount) as amount FROM Expense e " +
+	@Query("SELECT et.tagId as tagId, SUM(e.amount) as amount FROM Expense e " +
 		"JOIN ExpenseTag et on et.groupId = e.groupId and et.expenseId = e.expenseId " +
 		"and e.groupId = :groupId and e.groupId = :groupId and e.year = :year and e.month = :month group by tagId")
 	List<TagAmountProjection> getMonthlyBreakdownByTag(

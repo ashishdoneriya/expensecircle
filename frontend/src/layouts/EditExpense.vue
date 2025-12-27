@@ -1,6 +1,6 @@
 <template>
 	<el-row justify="center">
-		<el-col :xs="24" :sm="22" :md="15" :lg="12" :xl="9">
+		<el-col :xs="24" :sm="22" :md="15" :lg="12" :xl="9" is-loading="loading">
 			<el-form
 				:model="form"
 				label-width="auto"
@@ -56,41 +56,7 @@
 				</el-form-item>
 
 				<el-form-item label="Tags">
-					<el-select
-						v-model="form.tags"
-						placeholder="Select Tags"
-						multiple
-						filterable
-						allow-create
-						default-first-option
-						:reserve-keyword="false">
-						<el-option
-							v-for="tag in group.tags"
-							:label="tag.tagName"
-							:value="tag.tagId" />
-					</el-select>
-				</el-form-item>
-
-				<el-form-item
-					label="Created"
-					v-if="
-						!(
-							expense.ownerUserId == expense.lastChangedByUserId &&
-							expense.ownerUserId == userStore.userId
-						)
-					">
-					<el-text>{{ expense.ownerUserId }}</el-text>
-				</el-form-item>
-
-				<el-form-item
-					label="Last Edit"
-					v-if="
-						!(
-							expense.ownerUserId == expense.lastChangedByUserId &&
-							expense.ownerUserId == userStore.userId
-						)
-					">
-					<el-text>{{ expense.lastChangedByUserId }}</el-text>
+					<Tags v-model="form.tags" />
 				</el-form-item>
 
 				<el-form-item :label="isMobile ? '' : ' '">
@@ -105,7 +71,39 @@
 					</el-button>
 					<el-button @click="goBack">Cancel</el-button>
 				</el-form-item>
+
+				<el-form-item
+					:label="isMobile ? '' : ' '"
+					style="margin-top: 30px"
+					v-if="auditState != 'loaded'">
+					<div @click="loadAuditDetails()" class="flex-container cursorPointer">
+						<Image name="history" v-if="auditState == 'notRequested'" />
+						<el-icon class="is-loading marginRight10" style v-else>
+							<Loading />
+						</el-icon>
+						View Activity
+					</div>
+				</el-form-item>
 			</el-form>
+		</el-col>
+	</el-row>
+	<el-row
+		justify="center"
+		v-if="auditState == 'loaded'"
+		style="margin-top: 30px">
+		<el-col :xs="24" :sm="22" :md="15" :lg="12" :xl="9">
+			<el-descriptions
+				title="Activity History"
+				:column="1"
+				:size="isMobile ? 'small' : 'default'"
+				border>
+				<el-descriptions-item label="Created by">
+					{{ auditDetails.createdBy }}
+				</el-descriptions-item>
+				<el-descriptions-item label="Updated by" v-if="auditDetails.updatedBy">
+					{{ auditDetails.updatedBy }}
+				</el-descriptions-item>
+			</el-descriptions>
 		</el-col>
 	</el-row>
 </template>
@@ -116,12 +114,13 @@
 	import { ElMessage, ElMessageBox } from "element-plus";
 	import { useGroupStore } from "@/stores/group";
 	import * as api from "@/api/api";
-	import { Plus } from "@element-plus/icons-vue";
+	import { Plus, Loading } from "@element-plus/icons-vue";
 	import { useUserStore } from "@/stores/user";
 	import { Delete } from "@element-plus/icons-vue";
-
+	import Tags from "@/components/Tags.vue";
+	import Image from "@/components/Image.vue";
 	const userStore = useUserStore();
-
+	const loading = ref(true);
 	const group = useGroupStore();
 	const route = useRoute();
 	const router = useRouter();
@@ -138,12 +137,20 @@
 
 	const formRef = ref(null);
 
+	// three states - notLoaded, loading, loaded
+	const auditState = ref("notRequested");
+
 	// Validation rules
 	const rules = {
 		amount: [
 			{ required: true, message: "Amount is required", trigger: "blur" },
 		],
 	};
+
+	const auditDetails = ref({
+		createdBy: "",
+		updatedBy: "",
+	});
 
 	onMounted(async () => {
 		let expenseId = route.params.expenseId;
@@ -152,12 +159,25 @@
 			group.initialize(groupId);
 		}
 		if (route.params.expenseId) {
-			expense.value = (await api.getExpense(group.groupId, expenseId)).data;
+			try {
+				expense.value = (await api.getExpense(group.groupId, expenseId)).data;
+			} catch (error) {
+				console.log(error);
+				ElMessage({
+					message: "Unable to load data, please try after some time",
+					type: "error",
+					offset: window.innerHeight - 100,
+				});
+			}
+			loading.value = false;
 			form.timestamp = expense.value.timestamp;
 			form.categoryId = expense.value.categoryId;
 			form.amount = expense.value.amount;
 			form.description = expense.value.description;
-			form.tags = expense.value.tags;
+			form.tags = expense.value.tags.map((tagId) => ({
+				tagId,
+				tagName: group.tagsMap[tagId],
+			}));
 		}
 	});
 
@@ -174,29 +194,16 @@
 		} catch (error) {}
 	}
 
-	function isActuallyBase64(str) {
-		try {
-			// Step 1: Structural check
-			if (!/^[A-Za-z0-9+/]*={0,2}$/.test(str)) return false;
-
-			// Step 2: Attempt decoding
-			return btoa(atob(str)) === str;
-		} catch (err) {
-			return false;
-		}
-	}
-
 	function onSubmit() {
 		formRef.value.validate((valid) => {
 			if (valid) {
 				let obj = {
 					expenseId: expense.value.expenseId,
-					newTimestamp: Number(form.timestamp),
+					timestamp: Number(form.timestamp),
 					amount: form.amount,
 					categoryId: form.categoryId,
 					description: form.description,
-					tags: form.tags.filter((item) => isActuallyBase64(item)),
-					newTags: form.tags.filter((item) => !isActuallyBase64(item)),
+					tags: form.tags,
 				};
 
 				api
@@ -224,11 +231,57 @@
 		});
 	}
 
+	async function loadAuditDetails() {
+		if (auditState.value == "loading") {
+			return;
+		}
+		auditState.value = "loading";
+		try {
+			let data = (
+				await api.getExpenseAuditDetails(group.groupId, expense.value.expenseId)
+			).data;
+			if (!data.createdByName && !data.createdByName) {
+				ElMessage({
+					message: "Activity History not available",
+					type: "error",
+					offset: window.innerHeight - 100,
+				});
+				auditState.value = "";
+				return;
+			}
+			auditDetails.value.createdBy = `${data.createdByName} (${data.createdByEmail}) on ${epochToString(data.createdAt)}`;
+			if (data.updatedByName) {
+				auditDetails.value.updatedBy = `${data.updatedByName} (${data.updatedByEmail}) on ${epochToString(data.updatedAt)}`;
+			}
+
+			auditState.value = "loaded";
+		} catch (error) {
+			console.log(error);
+			ElMessage({
+				message: "Activity History not available",
+				type: "error",
+				offset: window.innerHeight - 100,
+			});
+			auditState.value = "";
+		}
+	}
+
+	function epochToString(epoch) {
+		return new Intl.DateTimeFormat("en-IN", {
+			day: "2-digit",
+			month: "short",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+			hour12: true,
+		}).format(new Date(Number(epoch)));
+	}
+
 	function goBack() {
 		router.back();
 	}
 
 	function addCategory() {
-		router.push(`/groups/${group.groupId}/categories`);
+		router.push(`/groups/${group.groupId}/settings/categories`);
 	}
 </script>

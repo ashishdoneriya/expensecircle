@@ -53,9 +53,7 @@
 	const user = ref({ name: "", email: "" });
 
 	const callback = (response) => {
-		console.log("Handle the response", response);
 		const userData = decodeCredential(response.credential);
-		console.log("Handle the userData", userData);
 		loginViaGoogleIdToken(response.credential).then((response) => {
 			response = response.data;
 			userStore.setUserInfo(

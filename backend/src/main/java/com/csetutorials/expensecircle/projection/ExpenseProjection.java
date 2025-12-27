@@ -1,15 +1,9 @@
 package com.csetutorials.expensecircle.projection;
 
-public interface ExpenseProjection {
-
-	String getExpenseId();
-
-	long getTimestamp();
-
-	Long getAmount();
-
-	String getDescription();
-
-	String getCategoryId();
-
-}
+public record ExpenseProjection (
+	String expenseId,
+	long timestamp,
+	Long amount,
+	String description,
+	String categoryId
+){}

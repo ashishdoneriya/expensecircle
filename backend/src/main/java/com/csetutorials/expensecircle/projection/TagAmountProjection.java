@@ -1,9 +1,6 @@
 package com.csetutorials.expensecircle.projection;
 
-public interface TagAmountProjection {
-
-	String getTagId();
-
-	long getAmount();
-
-}
+public record TagAmountProjection (
+	String tagId,
+	long amount
+){}

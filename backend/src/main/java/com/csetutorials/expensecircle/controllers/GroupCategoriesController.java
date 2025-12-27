@@ -1,7 +1,7 @@
 package com.csetutorials.expensecircle.controllers;
 
 import com.csetutorials.expensecircle.annotations.GroupMemberOnly;
-import com.csetutorials.expensecircle.beans.Name;
+import com.csetutorials.expensecircle.dto.Name;
 import com.csetutorials.expensecircle.beans.NewOrder;
 import com.csetutorials.expensecircle.entities.GroupCategory;
 import com.csetutorials.expensecircle.services.AsyncCalls;

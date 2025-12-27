@@ -68,6 +68,14 @@
 		storageKey: "isDark",
 	});
 
+	const labelMap = {
+		'new-expense' : 'New Expense',
+		'edit-expense': 'Update Expense',
+		'recurring-expenses': 'Recurring Expenses',
+		'new-recurring-expense': 'New Recurring Expense',
+		'edit-recurring-expense': 'Update Recurring Expense'
+	}
+
 	const breadcrumbs = computed(() => {
 		// Defensive check: if route.path is not available yet, return empty array
 		if (!route || !route.path) return [];
@@ -82,10 +90,10 @@
 		if (groupsIndex === -1) return [];
 
 		// Slice the path array so we only process segments starting from 'groups'
-		const activeSegments = pathArray.slice(groupsIndex);
+		let activeSegments = pathArray.slice(groupsIndex);
 		let accumulatedPath = "";
 
-		return activeSegments
+		activeSegments = activeSegments
 			.map((segment, index) => {
 				// Reconstruct the actual URL path segment by segment using the original array
 				const originalSegment = pathArray[index + groupsIndex];
@@ -113,17 +121,28 @@
 				}
 				// Logic for subsequent segments (settings, categories, etc.)
 				else {
-					// Standard formatting: Capitalize the first letter for professional look
-					label = label.charAt(0).toUpperCase() + label.slice(1);
+					if (labelMap[label]) {
+						label = labelMap[label];
+					} else {
+						// Standard formatting: Capitalize the first letter for professional look
+						label = label.charAt(0).toUpperCase() + label.slice(1);
+					}
+
 				}
 
 				return {
 					label: label,
 					path: finalPath,
+					ignoreFourthParam: labelMap[label]
 				};
 			})
 			.filter((crumb) => crumb !== null); // Remove any null entries caused by safety checks
+			if (activeSegments.length == 4 && activeSegments[2]['label'].startsWith('Update')) {
+				activeSegments.splice(3, 1);
+			}
+			return activeSegments;
 	});
+
 	function goBackToDashboard() {
 		group.clearInfo();
 		router.push("/groups");

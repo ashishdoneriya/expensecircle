@@ -9,6 +9,8 @@ public record ExpenseResponseDto (
 	long amount,
 	String description,
 	List<String> tags,
-	String ownerUserId,
-	String lastChangedByUserId
+	String createdBy,
+	String updatedBy,
+	Long createdAt,
+	Long updatedAt
 ) {}

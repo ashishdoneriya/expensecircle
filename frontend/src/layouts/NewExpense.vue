@@ -58,19 +58,7 @@
 				</el-form-item>
 
 				<el-form-item label="Tags">
-					<el-select
-						v-model="form.tags"
-						placeholder="Select Tags"
-						multiple
-						filterable
-						allow-create
-						default-first-option
-						:reserve-keyword="false">
-						<el-option
-							v-for="tag in group.tags"
-							:label="tag.tagName"
-							:value="tag.tagId"/>
-					</el-select>
+					<Tags v-model="form.tags" />
 				</el-form-item>
 
 				<el-form-item :label="isMobile ? '' : ' '">
@@ -132,8 +120,7 @@
 					amount: form.amount,
 					categoryId: form.categoryId,
 					description: form.description,
-					tags: form.tags.filter((item) => typeof item === "number"),
-					newTags: form.tags.filter((item) => typeof item === "string"),
+					tags: form.tags
 				};
 
 				api.addExpense(group.groupId, obj)
@@ -169,6 +156,6 @@
 	}
 
 	function addCategory() {
-		router.push(`/groups/${group.groupId}/categories`);
+		router.push(`/groups/${group.groupId}/settings/categories`);
 	}
 </script>

@@ -20,6 +20,16 @@
 			<span class="label">Stats</span>
 		</div>
 
+				<div
+			class="bottom-bar-item"
+			@click="navigateTo('recurring-expenses')"
+			:class="{ active: activePage === 'recurring-expenses' }">
+			<el-icon class="icon">
+				<Refresh />
+			</el-icon>
+			<span class="label">Recurring Expenses</span>
+		</div>
+
 		<div
 			class="bottom-bar-item"
 			@click="navigateTo('settings')"

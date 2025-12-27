@@ -11,11 +11,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class IdGenerator {
 
-	public static void main() {
-		IdGenerator generator = new IdGenerator(1);
-		System.out.println(generator.getStringId());
-	}
-
 	/**
 	 * Date and time (GMT): Wednesday, January 1, 2025 12:00:00 AM
 	 */

@@ -20,6 +20,9 @@ import EditExpense from "@/layouts/EditExpense.vue";
 import GroupSettingsLayout from "@/layouts/GroupSettingsLayout.vue";
 import GroupSettingsMenu from "@/layouts/GroupSettingsMenu.vue";
 import Members from "@/layouts/Members.vue";
+import RecurringExpenses from "@/layouts/RecurringExpenses.vue";
+import NewRecurringExpense from "@/layouts/NewRecurringExpense.vue";
+import EditRecurringExpense from "@/layouts/EditRecurringExpense.vue";
 
 const router = createRouter({
 	history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,18 +46,34 @@ const router = createRouter({
 			children: [
 				{
 					path: "expenses",
+					alias: [""],
 					name: "Expenses",
 					component: Expenses,
 				},
 				{
-					path: "expense",
+					path: "new-expense",
 					name: "NewExpense",
 					component: NewExpense,
 				},
 				{
-					path: "expense/:expenseId",
+					path: "edit-expense/:expenseId",
 					name: "EditExpense",
 					component: EditExpense,
+				},
+				{
+					path: "recurring-expenses",
+					name: "RecurringExpenses",
+					component: RecurringExpenses,
+				},
+				{
+					path: "new-recurring-expense",
+					name: "NewRecurringExpense",
+					component: NewRecurringExpense,
+				},
+				{
+					path: "edit-recurring-expense/:expenseId",
+					name: "EditRecurringExpense",
+					component: EditRecurringExpense,
 				},
 				{
 					path: "stats",

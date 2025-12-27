@@ -1,4 +1,4 @@
-package com.csetutorials.expensecircle.beans;
+package com.csetutorials.expensecircle.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,13 +7,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NewUserPermissionRequest {
+public class UserIdWrapper {
 
 	@NotNull
 	@NotBlank
 	private String userId;
-
-	@NotNull
-	private Role role;
-
 }

@@ -13,7 +13,8 @@ export const useGroupStore = defineStore("groupStore", {
 		tagsMap: {},
 		groupInfo: null,
 		isInitialized: false,
-		members: []
+		members: [],
+		membersMap: {}
 	}),
 
 	actions: {
@@ -51,6 +52,9 @@ export const useGroupStore = defineStore("groupStore", {
 				}
 			}
 			this.members.unshift(member);
+			for (let member of this.members) {
+				this.membersMap[member.userId] = member
+			}
 		},
 
 		async changeUserPermission(member, role) {
@@ -65,6 +69,7 @@ export const useGroupStore = defineStore("groupStore", {
 					this.members.splice(i, 1);
 				}
 			}
+			delete this.membersMap[member.userId]
 		},
 
 		async addMember(email) {
@@ -118,7 +123,7 @@ export const useGroupStore = defineStore("groupStore", {
 		async deleteCategory(categoryId) {
 			try {
 				await api.deleteCategory(this.groupId, categoryId);
-				this.categoriesMap.delete(categoryId);
+				delete this.categoriesMap[categoryId];
 				for (let i = 0; i < this.categories.length; i++) {
 					if (this.categories[i]["categoryId"] == categoryId) {
 						this.categories.splice(i, 1);
@@ -177,7 +182,7 @@ export const useGroupStore = defineStore("groupStore", {
 		async deleteTag(tagId) {
 			try {
 				await api.deleteTag(this.groupId, tagId);
-				this.tagsMap.delete(tagId);
+				delete this.tagsMap[tagId];
 				for (let i = 0; i < this.tags.length; i++) {
 					if (this.tags[i]["tagId"] == tagId) {
 						this.tags.splice(i, 1);

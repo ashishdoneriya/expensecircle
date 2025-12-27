@@ -55,7 +55,7 @@
 	}
 
 	function openExpense(expense) {
-		router.push(`/groups/${group.groupId}/expense/${expense.expenseId}`);
+		router.push(`/groups/${group.groupId}/edit-expense/${expense.expenseId}`);
 	}
 
 	// This computed property will watch both 'expenses' and 'preferenceStore.sortOrder'
