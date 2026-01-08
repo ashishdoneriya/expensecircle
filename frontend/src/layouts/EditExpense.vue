@@ -60,7 +60,7 @@
 				</el-form-item>
 
 				<el-form-item :label="isMobile ? '' : ' '">
-					<el-button type="primary" @click="onSubmit" :disabled="!form.amount">
+					<el-button type="primary" @click="onSubmit" :disabled="!form.amount || isSubmitting">
 						Update
 					</el-button>
 					<el-button
@@ -133,6 +133,8 @@
 		tags: [],
 	});
 
+	const isSubmitting = ref(false);
+
 	const expense = ref({});
 
 	const formRef = ref(null);
@@ -195,6 +197,10 @@
 	}
 
 	function onSubmit() {
+		if (isSubmitting.value) {
+			return;
+		}
+		isSubmitting.value = true;
 		formRef.value.validate((valid) => {
 			if (valid) {
 				let obj = {
@@ -224,8 +230,10 @@
 							type: "error",
 							offset: window.innerHeight - 100,
 						});
-					});
+					})
+					.finally(()=> isSubmitting.value = false)
 			} else {
+				isSubmitting.value = false;
 				return false;
 			}
 		});

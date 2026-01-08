@@ -3,7 +3,6 @@ package com.csetutorials.expensecircle.controllers;
 import com.csetutorials.expensecircle.exceptions.UnauthorizedAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -16,13 +15,6 @@ public class GlobalExceptionHandler {
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	public ResponseEntity<String> handleUnauthorizedAccess(UnauthorizedAccessException e) {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-	}
-
-	@ExceptionHandler(AccessDeniedException.class)
-	public ResponseEntity<String> handleAccessDenied(AccessDeniedException e) {
-		return new ResponseEntity<>(
-			"You do not have permission to perform this action. Admin rights required.",
-			HttpStatus.FORBIDDEN);
 	}
 
 	@ExceptionHandler(ResponseStatusException.class)
