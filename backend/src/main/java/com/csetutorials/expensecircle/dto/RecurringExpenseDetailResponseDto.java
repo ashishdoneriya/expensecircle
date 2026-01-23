@@ -25,6 +25,7 @@ public class RecurringExpenseDetailResponseDto {
 	private byte executionTimeHour; // 0-23
 	private byte executionTimeMinute; // 0-59
 	private DayPeriod dayPeriod;
+	private String timezone;
 	private String createdBy;
 	private String updatedBy;
 	private Long createdAt;

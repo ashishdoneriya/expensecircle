@@ -10,6 +10,11 @@ import com.csetutorials.expensecircle.projection.RecurringExpenseSummaryProjecti
 import com.csetutorials.expensecircle.repositories.RecurringExpenseRepository;
 import com.csetutorials.expensecircle.utilities.DateUtils;
 import com.csetutorials.expensecircle.utilities.StringUtils;
+import java.time.DayOfWeek;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -49,6 +54,7 @@ public class RecurringExpenseService {
 			.executionTimeHour(request.getExecutionTimeHour())
 			.executionTimeMinute(request.getExecutionTimeMinute())
 			.dayPeriod(request.getDayPeriod())
+			.timezone(request.getTimezone())
 			.nextTriggerEpoch(calculateInitialEpoch(request))
 			.build());
 		tagService.addAll(groupId, recurringId,
@@ -56,6 +62,15 @@ public class RecurringExpenseService {
 	}
 
 	public void update(String groupId, String recurringId, RecurringExpenseRequest request) {
+		var opt = repo.findByGroupIdAndRecurringId(
+				groupId, recurringId)
+			.map(this::convert);
+		if (opt.isEmpty()) {
+			return;
+		} else {
+			request.setTimezone(opt.get().getTimezone());
+		}
+
 		repo.save(RecurringExpense.builder()
 			.groupId(groupId)
 			.recurringId(recurringId)
@@ -68,6 +83,7 @@ public class RecurringExpenseService {
 			.executionTimeHour(request.getExecutionTimeHour())
 			.executionTimeMinute(request.getExecutionTimeMinute())
 			.dayPeriod(request.getDayPeriod())
+			.timezone(request.getTimezone())
 			.nextTriggerEpoch(calculateInitialEpoch(request))
 			.build());
 		tagService.deleteByGroupIdAndRecurringId(groupId, recurringId);
@@ -117,6 +133,7 @@ public class RecurringExpenseService {
 			.dayPeriod(e.getDayPeriod())
 			.executionTimeHour(e.getExecutionTimeHour())
 			.executionTimeMinute(e.getExecutionTimeMinute())
+			.timezone(e.getTimezone())
 			.createdBy(e.getCreatedBy())
 			.updatedBy(e.getUpdatedBy())
 			.createdAt(e.getCreatedAt())
@@ -133,33 +150,48 @@ public class RecurringExpenseService {
 	}
 
 	private long calculateInitialEpoch(RecurringExpenseRequest request) {
-
-		Calendar initial = Calendar.getInstance();
-		initial.set(Calendar.SECOND, 0);
-		initial.set(Calendar.MILLISECOND, 0);
-		initial.set(Calendar.MINUTE, request.getExecutionTimeMinute());
-		initial.set(Calendar.HOUR, request.getExecutionTimeHour());
-		initial.set(Calendar.AM_PM, request.getDayPeriod() == DayPeriod.AM ? Calendar.AM : Calendar.PM);
+		ZonedDateTime zdt = ZonedDateTime.now(ZoneId.of(request.getTimezone()));
+		int hour = request.getExecutionTimeHour();
+		if (request.getDayPeriod() == DayPeriod.PM) {
+			hour += 12;
+		}
+		zdt = zdt.withNano(0)
+			.withSecond(0)
+			.withMinute(request.getExecutionTimeMinute())
+			.withHour(hour);
 
 		if (RecurringFrequency.WEEKLY == request.getFrequency()) {
-			initial.set(Calendar.DAY_OF_WEEK, DateUtils.WEEK_MAP.get(request.getDayOfWeek()));
+			zdt = zdt.with(
+				TemporalAdjusters
+					.nextOrSame(
+						DateUtils.WEEK_MAP.get(request.getDayOfWeek())));
+
 		} else if (RecurringFrequency.MONTHLY == request.getFrequency()) {
-			if (request.getDayOfMonth() == 99) {
-				initial.set(Calendar.DAY_OF_MONTH, YearMonth.now().lengthOfMonth());
+			if (request.getDayOfMonth() > zdt.toLocalDate().lengthOfMonth()) {
+				zdt = zdt.with(TemporalAdjusters.lastDayOfMonth());
 			} else {
-				initial.set(Calendar.DAY_OF_MONTH, request.getDayOfMonth());
+				zdt = zdt.withDayOfMonth(request.getDayOfMonth());
 			}
 		}
 
-		if (initial.compareTo(Calendar.getInstance()) < 0) {
-			if (RecurringFrequency.WEEKLY == request.getFrequency()) {
-				initial.add(Calendar.DAY_OF_MONTH, 7);
-			} else if (RecurringFrequency.MONTHLY == request.getFrequency()) {
-				initial.add(Calendar.MONTH, 1);
-			}
+		ZonedDateTime now = ZonedDateTime.now(ZoneId.of(request.getTimezone()));
+
+		if (zdt.isBefore(now)) {
+			zdt = switch (request.getFrequency()) {
+				case DAILY -> zdt.plusDays(1);
+				case WEEKLY -> zdt.plusWeeks(1);
+				case MONTHLY -> {
+					zdt = zdt.plusMonths(1);
+					if (request.getDayOfMonth() > zdt.toLocalDate().lengthOfMonth()) {
+						yield zdt.with(TemporalAdjusters.lastDayOfMonth());
+					} else {
+						yield zdt.withDayOfMonth(request.getDayOfMonth());
+					}
+				}
+			};
 		}
 
-		return initial.getTimeInMillis();
+		return zdt.toInstant().toEpochMilli();
 	}
 
 	public AuditHistoryDto getAuditHistory(String groupId, String recurringId) {

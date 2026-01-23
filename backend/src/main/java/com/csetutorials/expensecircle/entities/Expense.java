@@ -22,6 +22,9 @@ public class Expense extends Auditable {
 	@Column(nullable = false)
 	private long timestamp;
 
+	@Column(nullable = false, length = 35)
+	private String timezone;
+
 	@Column(nullable = false)
 	private short year;
 

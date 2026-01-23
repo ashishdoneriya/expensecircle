@@ -17,10 +17,33 @@
 						value-format="x"
 						style="width: 100%"
 						:editable="false" />
+					<span v-if="expenseTimezone != browserTimezone">
+						{{ sanitizeTimezone(expenseTimezone) }} Timezone
+					</span>
+				</el-form-item>
+
+				<el-form-item label="Amount" prop="amount">
+					<el-input
+						v-model.number="form.amount"
+						placeholder="Enter amount"
+						type="number"
+						autocomplete="off" />
+				</el-form-item>
+
+				<el-form-item label="Description">
+					<el-input
+						v-model.number="form.description"
+						placeholder="Description"
+						type="text" />
 				</el-form-item>
 
 				<el-form-item label="Category">
-					<el-select v-model="form.categoryId" placeholder="Select Category">
+					<el-select
+						v-model="form.categoryId"
+						placeholder="Select Category"
+						:popper-options="{
+							placement: 'top',
+						}">
 						<el-option
 							v-for="category in group.categories"
 							:label="category.categoryName"
@@ -40,27 +63,15 @@
 					</el-select>
 				</el-form-item>
 
-				<el-form-item label="Amount" prop="amount">
-					<el-input
-						v-model.number="form.amount"
-						placeholder="Enter amount"
-						type="number"
-						autocomplete="off" />
-				</el-form-item>
-
-				<el-form-item label="Description">
-					<el-input
-						v-model.number="form.description"
-						placeholder="Description"
-						type="text" />
-				</el-form-item>
-
 				<el-form-item label="Tags">
 					<Tags v-model="form.tags" />
 				</el-form-item>
 
 				<el-form-item :label="isMobile ? '' : ' '">
-					<el-button type="primary" @click="onSubmit" :disabled="!form.amount || isSubmitting">
+					<el-button
+						type="primary"
+						@click="onSubmit"
+						:disabled="!form.amount || isSubmitting">
 						Update
 					</el-button>
 					<el-button
@@ -119,6 +130,8 @@
 	import { Delete } from "@element-plus/icons-vue";
 	import Tags from "@/components/Tags.vue";
 	import Image from "@/components/Image.vue";
+	import { DateTime } from "luxon";
+
 	const userStore = useUserStore();
 	const loading = ref(true);
 	const group = useGroupStore();
@@ -138,6 +151,10 @@
 	const expense = ref({});
 
 	const formRef = ref(null);
+
+	const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+	const expenseTimezone = ref("");
 
 	// three states - notLoaded, loading, loaded
 	const auditState = ref("notRequested");
@@ -172,7 +189,15 @@
 				});
 			}
 			loading.value = false;
-			form.timestamp = expense.value.timestamp;
+			expenseTimezone.value = expense.value.timezone;
+			if (expenseTimezone.value == browserTimezone) {
+				form.timestamp = expense.value.timestamp;
+			} else {
+				form.timestamp = DateTime.fromMillis(expense.value.timestamp)
+				.setZone(expense.value.timezone)
+				.setZone(browserTimezone, { keepLocalTime: true })
+				.toMillis();
+			}
 			form.categoryId = expense.value.categoryId;
 			form.amount = expense.value.amount;
 			form.description = expense.value.description;
@@ -180,6 +205,7 @@
 				tagId,
 				tagName: group.tagsMap[tagId],
 			}));
+
 		}
 	});
 
@@ -205,7 +231,9 @@
 			if (valid) {
 				let obj = {
 					expenseId: expense.value.expenseId,
-					timestamp: Number(form.timestamp),
+					timestamp: DateTime.fromMillis(form.timestamp)
+						.setZone(expense.value.timezone, { keepLocalTime: true })
+						.toMillis(),
 					amount: form.amount,
 					categoryId: form.categoryId,
 					description: form.description,
@@ -231,7 +259,7 @@
 							offset: window.innerHeight - 100,
 						});
 					})
-					.finally(()=> isSubmitting.value = false)
+					.finally(() => (isSubmitting.value = false));
 			} else {
 				isSubmitting.value = false;
 				return false;
@@ -275,14 +303,22 @@
 	}
 
 	function epochToString(epoch) {
-		return new Intl.DateTimeFormat("en-IN", {
-			day: "2-digit",
-			month: "short",
-			year: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-			hour12: true,
-		}).format(new Date(Number(epoch)));
+		if (expenseTimezone.value == browserTimezone) {
+			return DateTime.fromMillis(epoch).toFormat("dd LLL yyyy hh:mm a");
+		} else {
+			let formatted = DateTime.fromMillis(epoch)
+			.setZone(expenseTimezone.value)
+			.setZone(browserTimezone, { keepLocalTime: true })
+			.toFormat("dd LLL yyyy hh:mm a");
+			return `${formatted} (${expenseTimezone.value} Timezone)`;
+		}
+	}
+
+	function sanitizeTimezone(timezone) {
+		if (timezone == "Asia/Calcutta") {
+			return "Asia/Kolkata";
+		}
+		return timezone.replaceAll("_", " ");
 	}
 
 	function goBack() {

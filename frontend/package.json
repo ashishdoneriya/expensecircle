@@ -25,6 +25,7 @@
 		"core-js": "^3.37.1",
 		"date-fns": "^4.1.0",
 		"element-plus": "^2.8.6",
+		"luxon": "^3.7.2",
 		"roboto-fontface": "*",
 		"vee-validate": "^4.14.1",
 		"vue": "^3.4.31",

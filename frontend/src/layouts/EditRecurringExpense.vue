@@ -100,6 +100,9 @@
 							<el-option label="PM" value="PM" />
 						</el-select>
 					</el-col>
+					<el-col :span="24" v-if="browserTimezone != expenseTimezone">
+						{{ sanitizeTimezone(expenseTimezone) }} Timezone
+					</el-col>
 				</el-form-item>
 
 				<el-form-item :label="isMobile ? '' : ' '">
@@ -159,6 +162,8 @@
 	import { Delete } from "@element-plus/icons-vue";
 	import Tags from "@/components/Tags.vue";
 	import Image from "@/components/Image.vue";
+	import { DateTime } from "luxon";
+
 	const userStore = useUserStore();
 	const group = useGroupStore();
 	const route = useRoute();
@@ -184,6 +189,10 @@
 
 	const formRef = ref(null);
 
+	const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+	const expenseTimezone = ref("");
+
 	// three states - notLoaded, loading, loaded
 	const auditState = ref("notRequested");
 
@@ -199,7 +208,7 @@
 		updatedBy: "",
 	});
 
-	const expenseId = route.params.expenseId
+	const expenseId = route.params.expenseId;
 
 	onMounted(async () => {
 		let groupId = route.params.groupId;
@@ -233,6 +242,7 @@
 			form.dayPeriod = expense.value.dayPeriod;
 			form.executionTimeHour = expense.value.executionTimeHour;
 			form.executionTimeMinute = expense.value.executionTimeMinute;
+			expenseTimezone.value = expense.value.timezone;
 		}
 	});
 
@@ -297,7 +307,10 @@
 		auditState.value = "loading";
 		try {
 			let data = (
-				await api.getRecurringExpenseAuditDetails(group.groupId, route.params.expenseId)
+				await api.getRecurringExpenseAuditDetails(
+					group.groupId,
+					route.params.expenseId,
+				)
 			).data;
 			if (!data.createdByName && !data.createdByName) {
 				ElMessage({
@@ -326,14 +339,22 @@
 	}
 
 	function epochToString(epoch) {
-		return new Intl.DateTimeFormat("en-IN", {
-			day: "2-digit",
-			month: "short",
-			year: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-			hour12: true,
-		}).format(new Date(Number(epoch)));
+		if (expenseTimezone.value == browserTimezone) {
+			return DateTime.fromMillis(epoch).toFormat("dd LLL yyyy hh:mm a");
+		} else {
+			let formatted = DateTime.fromMillis(epoch)
+			.setZone(expenseTimezone.value)
+			.setZone(browserTimezone, { keepLocalTime: true })
+			.toFormat("dd LLL yyyy hh:mm a");
+			return `${formatted} (${expenseTimezone.value} Timezone)`;
+		}
+	}
+
+	function sanitizeTimezone(timezone) {
+		if (timezone == "Asia/Calcutta") {
+			return "Asia/Kolkata";
+		}
+		return timezone.replaceAll("_", " ");
 	}
 
 	function goBack() {

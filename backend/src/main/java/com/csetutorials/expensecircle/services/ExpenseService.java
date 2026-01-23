@@ -1,5 +1,9 @@
 package com.csetutorials.expensecircle.services;
 
+import com.csetutorials.expensecircle.utilities.DateUtils;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
@@ -30,35 +34,58 @@ public class ExpenseService {
 
 	public String addExpense(String groupId, ExpenseRequest request) {
 		String id = idGenerator.getStringId();
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(request.getTimestamp());
+		ZonedDateTime zdt = DateUtils.getDateTime(
+			request.getTimestamp(), request.getTimezone());
 		Expense expense = Expense.builder()
 			.groupId(groupId)
 			.expenseId(id)
-			.year((short) calendar.get(Calendar.YEAR))
-			.month((byte) (calendar.get(Calendar.MONTH) + 1))
-			.dayOfMonth((byte) calendar.get(Calendar.DAY_OF_MONTH))
+			.year((short) zdt.getYear())
+			.month((byte) zdt.getMonth().getValue())
+			.dayOfMonth((byte) zdt.getDayOfMonth())
 			.amount(request.getAmount())
 			.description(request.getDescription())
 			.categoryId(request.getCategoryId())
 			.timestamp(request.getTimestamp())
+			.timezone(request.getTimezone())
 			.build();
 		repo.save(expense);
 		return id;
-	} 
+	}
+
+	public String addExpense(String groupId, ExpenseRequest request, String userId) {
+		String id = idGenerator.getStringId();
+		ZonedDateTime zdt = DateUtils.getDateTime(
+			request.getTimestamp(), request.getTimezone());
+		Expense expense = Expense.builder()
+			.groupId(groupId)
+			.expenseId(id)
+			.year((short) zdt.getYear())
+			.month((byte) zdt.getMonth().getValue())
+			.dayOfMonth((byte) zdt.getDayOfMonth())
+			.amount(request.getAmount())
+			.description(request.getDescription())
+			.categoryId(request.getCategoryId())
+			.timestamp(request.getTimestamp())
+			.timezone(request.getTimezone())
+			.build();
+		expense.setCreatedBy(userId);
+		expense.setCreatedAt(request.getTimestamp());
+		repo.save(expense);
+		return id;
+	}
 
 	public void updateExpense(String groupId, String expenseId, ExpenseRequest request) {
 	
-		Optional<Expense> expenseOpt = repo.findByGroupIdAndExpenseId(groupId, expenseId);
-		if (expenseOpt.isEmpty()) {
+		Optional<Expense> opt = repo.findByGroupIdAndExpenseId(groupId, expenseId);
+		if (opt.isEmpty()) {
 			return;
 		}
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(request.getTimestamp());
-		Expense expense = expenseOpt.get();
-		expense.setYear((short) calendar.get(Calendar.YEAR));
-		expense.setMonth((byte) (calendar.get(Calendar.MONTH) + 1));
-		expense.setDayOfMonth((byte) calendar.get(Calendar.DAY_OF_MONTH));
+		Expense expense = opt.get();
+		ZonedDateTime zdt = DateUtils.getDateTime(
+			request.getTimestamp(), expense.getTimezone());
+		expense.setYear((short) zdt.getYear());
+		expense.setMonth((byte) zdt.getMonth().getValue());
+		expense.setDayOfMonth((byte) zdt.getDayOfMonth());
 		expense.setAmount(request.getAmount());
 		expense.setCategoryId(request.getCategoryId());
 		expense.setDescription(request.getDescription());

@@ -19,29 +19,6 @@
 						:editable="false" />
 				</el-form-item>
 
-				<el-form-item label="Category">
-					<el-select
-						v-model="form.categoryId"
-						placeholder="Select Category">
-						<el-option
-							v-for="category in group.categories"
-							:label="category.categoryName"
-							:value="category.categoryId"/>
-						<template #footer>
-							<div style="display: flex; gap: 1rem">
-								<el-button
-									text
-									bg
-									:icon="Plus"
-									@click="addCategory"
-									size="small">
-									Add Category
-								</el-button>
-							</div>
-						</template>
-					</el-select>
-				</el-form-item>
-
 				<el-form-item label="Amount" prop="amount">
 					<el-input
 						v-model.number="form.amount"
@@ -57,15 +34,33 @@
 						type="text" />
 				</el-form-item>
 
+				<el-form-item label="Category">
+					<el-select v-model="form.categoryId" placeholder="Select Category">
+						<el-option
+							v-for="category in group.categories"
+							:label="category.categoryName"
+							:value="category.categoryId" />
+						<template #footer>
+							<div style="display: flex; gap: 1rem">
+								<el-button
+									text
+									bg
+									:icon="Plus"
+									@click="addCategory"
+									size="small">
+									Add Category
+								</el-button>
+							</div>
+						</template>
+					</el-select>
+				</el-form-item>
+
 				<el-form-item label="Tags">
 					<Tags v-model="form.tags" />
 				</el-form-item>
 
 				<el-form-item :label="isMobile ? '' : ' '">
-					<el-button
-						type="primary"
-						@click="onSubmit"
-						:disabled="!form.amount">
+					<el-button type="primary" @click="onSubmit" :disabled="!form.amount">
 						Add
 					</el-button>
 					<el-button @click="goBack">Cancel</el-button>
@@ -95,10 +90,15 @@
 	});
 
 	onMounted(async () => {
-		if (route.query['timestamp']) {
-			let date = new Date(Number(route.query['timestamp']));
+		if (route.query["timestamp"]) {
+			let date = new Date(Number(route.query["timestamp"]));
 			let now = new Date();
-			date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+			date.setHours(
+				now.getHours(),
+				now.getMinutes(),
+				now.getSeconds(),
+				now.getMilliseconds(),
+			);
 			form.timestamp = date;
 		}
 	});
@@ -120,10 +120,12 @@
 					amount: form.amount,
 					categoryId: form.categoryId,
 					description: form.description,
-					tags: form.tags
+					tags: form.tags,
+					timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 				};
 
-				api.addExpense(group.groupId, obj)
+				api
+					.addExpense(group.groupId, obj)
 					.then(() => {
 						ElMessage({
 							message: "Added",

@@ -173,6 +173,7 @@
 					categoryId: form.categoryId,
 					description: form.description,
 					tags: form.tags,
+					timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
 				};
 
 				api

@@ -41,7 +41,7 @@ public class ExpenseCoordinator {
 			.map(e -> {
 				List<String> tagIds = expenseTagService.findByGroupIdAndExpenseId(groupId, expenseId);
 				return new ExpenseResponseDto(
-					e.getExpenseId(), e.getTimestamp(), e.getCategoryId(),
+					e.getExpenseId(), e.getTimestamp(), e.getTimezone(), e.getCategoryId(),
 					e.getAmount(), e.getDescription(), tagIds, e.getCreatedBy(),
 					e.getUpdatedBy(), e.getCreatedAt(), e.getUpdatedAt());
 			});

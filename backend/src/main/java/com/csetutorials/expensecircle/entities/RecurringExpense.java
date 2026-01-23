@@ -53,6 +53,9 @@ public class RecurringExpense extends Auditable {
 	@Column(nullable = false, columnDefinition = "CHAR(2)")
 	private DayPeriod dayPeriod;
 
+	@Column(nullable = false, length = 35)
+	private String timezone;
+
 	@Column
 	private long nextTriggerEpoch;
 

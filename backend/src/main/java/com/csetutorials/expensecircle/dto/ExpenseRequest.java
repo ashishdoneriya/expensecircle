@@ -19,4 +19,6 @@ public class ExpenseRequest {
 
 	private List<ExpenseTagDto> tags; // ids
 
+	private String timezone;
+
 }

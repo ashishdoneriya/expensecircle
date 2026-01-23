@@ -41,4 +41,7 @@ public class RecurringExpenseRequest {
 
 	private DayPeriod dayPeriod;
 
+	@NotNull
+	private String timezone;
+
 }
